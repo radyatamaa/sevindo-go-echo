@@ -17,36 +17,6 @@ import (
 	_authorRepo "github.com/bxcodec/go-clean-arch/author/repository"
 	_echoMiddleware "github.com/labstack/echo/middleware"
 
-	_helperUsecase "github.com/helper/usecase"
-
-	_memberHttpDeliver "github.com/member/delivery/http"
-	_memberRepo "github.com/member/repository"
-	_memberUsecase "github.com/member/usecase"
-
-	_membershipHttpDeliver "github.com/membership/delivery/http"
-	_membershipRepo "github.com/membership/repository"
-	_membershipUsecase "github.com/membership/usecase"
-
-	_provinceHttpDeliver "github.com/masterdata/province/delivery/http"
-	_provinceRepo "github.com/masterdata/province/repository"
-	_provinceUsecase "github.com/masterdata/province/usecase"
-
-	_accountApiKeyHttpDeliver "github.com/clientapi/account_api_key/delivery/http"
-	_accountApiKeyRepo "github.com/clientapi/account_api_key/repository"
-	_accountApiKeyUsecase "github.com/clientapi/account_api_key/usecase"
-
-	_accountApiHttpDeliver "github.com/clientapi/auth/account_api/delivery/http"
-	_accountApiRepo "github.com/clientapi/auth/account_api/repository"
-	_accountApiyUsecase "github.com/clientapi/auth/account_api/usecase"
-
-	_isHttpDeliver "github.com/clientapi/auth/identityserver/delivery/http"
-	_isUcase "github.com/clientapi/auth/identityserver/usecase"
-
-	_memberClientHttpDeliver "github.com/clientapi/member/delivery/http"
-	_memberClientUsecase "github.com/clientapi/member/usecase"
-
-	_membershipClientHttpDeliver "github.com/clientapi/membership/delivery/http"
-	_membershipClientUsecase "github.com/clientapi/membership/usecase"
 
 )
 
