@@ -1,28 +1,42 @@
 package main
 
 import (
-	_ "github.com/jinzhu/gorm/dialects/mssql"
-	//model "github.com/models"
+	"fmt"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"time"
+
+	model "github.com/models"
 )
 
 func main() {
 	//dev
-	//dbHost := "asparnas.database.windows.net"
-	//dbPort := "1433"
-	//dbUser := "adminasparnas"
-	//dbPass := "Standar123."
-	//dbName := "asparnas"
-	//connection := fmt.Sprintf("sqlserver://%s:(%s)@%s:%s?database=%s",
-	//	dbUser, dbPass, dbHost,dbPort, dbName)
-	//db, err := gorm.Open("mssql", connection)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//db, err := gorm.Open("mssql", "sqlserver://adminasparnas:Standar123@asparnas.database.windows.net:1433?database=asparnas")
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
+	db, err := gorm.Open("mysql", "adminbkni@bkni-ri:Standar123.@(bkni-ri.mysql.database.azure.com)/sevindo_dev?charset=utf8&parseTime=True&loc=Local")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	migration := model.MigrationHistory{}
+	errmigration := db.AutoMigrate(&migration)
+	if errmigration != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Migration",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
 
 
+	user := model.User{}
+	erruser := db.AutoMigrate(&user)
+	if erruser != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table User",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
 
 }
