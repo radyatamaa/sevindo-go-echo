@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"time"
 
 	model "github.com/models"
 )
@@ -27,12 +28,22 @@ func main() {
 		db.Create(&migration)
 	}
 
-
 	user := model.User{}
 	erruser := db.AutoMigrate(&user)
 	if erruser != nil {
 		migration := model.MigrationHistory{
 			DescMigration: "Add Table User",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	country := model.Country{}
+	errcountry := db.AutoMigrate(&country)
+	if errcountry != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Country",
 			Date:          time.Now(),
 		}
 
