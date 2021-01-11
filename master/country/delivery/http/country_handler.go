@@ -64,7 +64,7 @@ func (a *countryHandler) Create(c echo.Context) error {
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
-	return c.JSON(http.StatusCreated, res)
+	return c.JSON(http.StatusOK, res)
 }
 
 func (a *countryHandler) GetDetailID(c echo.Context) error {

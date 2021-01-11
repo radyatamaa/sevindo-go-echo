@@ -24,6 +24,12 @@ import (
 	_userHttpDeliver "github.com/auth/user/delivery/http"
 	_userRepo "github.com/auth/user/repository"
 	_userUcase "github.com/auth/user/usecase"
+
+	_countryHttpDeliver "github.com/master/country/delivery/http"
+	_countryRepo "github.com/master/country/repository"
+	_countryUcase "github.com/master/country/usecase"
+
+
 )
 
 func main() {
@@ -98,12 +104,15 @@ func main() {
 	authorRepo := _authorRepo.NewMysqlAuthorRepository(dbConn)
 	ar := _articleRepo.NewMysqlArticleRepository(dbConn)
 	userRepo := _userRepo.NewuserRepository(dbConn)
+	countryRepo := _countryRepo.NewCountryRepository(dbConn)
 
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 	isUsecase := _isUcase.NewidentityserverUsecase(urlForgotPassword, redirectUrlGoogle, clientIDGoogle, clientSecretGoogle, baseUrlis, basicAuth, accountStorage, accessKeyStorage)
 	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase,timeoutContext)
+	countryUsecase := _countryUcase.NewcountryUsecase(countryRepo,timeoutContext)
 
+	_countryHttpDeliver.NewcountryHandler(e,countryUsecase)
 	_userHttpDeliver.NewuserHandler(e, userUsecase, isUsecase)
 	_isHttpDeliver.NewisHandler(e, userUsecase, isUsecase)
 
