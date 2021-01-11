@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"time"
 
-	_ "github.com/denisenkom/go-mssqldb"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo"
 	"github.com/spf13/viper"
 
@@ -37,13 +38,13 @@ func main() {
 
 	//dev env
 	//dev db
-	dbHost := "asparnas.database.windows.net"
-	dbPort := 1433
-	dbUser := "adminasparnas"
-	dbPass := "Standar123"
-	dbName := "asparnas"
+	dbHost := "bkni-ri.mysql.database.azure.com"
+	dbPort := "3306"
+	dbUser := "adminbkni@bkni-ri"
+	dbPass := "Standar123."
+	dbName := "sevindo_dev"
 	//dev IS
-	baseUrlis := "http://identitity-server-cgo-dev.azurewebsites.net"
+	baseUrlis := "https://bkni-identity-server-dev.azurewebsites.net"
 	//dev URL Forgot Password
 	urlForgotPassword := "http://cgo-web-api-dev.azurewebsites.net/account/change-password"
 	//google auth
@@ -61,12 +62,15 @@ func main() {
 	//clientSecretGoogle := "z_XfHM4DtamjRmJdpu8q0gQf"
 
 	basicAuth := "cm9jbGllbnQ6c2VjcmV0"
-	accountStorage := "cgostorage"
-	accessKeyStorage := "OwvEOlzf6e7QwVoV0H75GuSZHpqHxwhYnYL9QbpVPgBRJn+26K26aRJxtZn7Ip5AhaiIkw9kH11xrZSscavXfQ=="
+	accountStorage := "bkniristorage"
+	accessKeyStorage := "/qInIc1r2fMeHHjonpstK8H8HOO5GFIDM4TV/n5+Wk9be3t+UPD4OS0qiVABDIRK5y7XBdlQiHrGyu6M1DDjjQ=="
 
-	connection := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;",
-		dbHost, dbUser, dbPass, dbPort, dbName)
-	dbConn, err := sql.Open(`sqlserver`, connection)
+	connection := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
+	val := url.Values{}
+	val.Add("parseTime", "1")
+	val.Add("loc", "Asia/Jakarta")
+	dsn := fmt.Sprintf("%s?%s", connection, val.Encode())
+	dbConn, err := sql.Open(`mysql`, dsn)
 	if err != nil && viper.GetBool("debug") {
 		fmt.Println(err)
 	}
