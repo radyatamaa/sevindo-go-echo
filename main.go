@@ -17,7 +17,12 @@ import (
 	_authorRepo "github.com/bxcodec/go-clean-arch/author/repository"
 	_echoMiddleware "github.com/labstack/echo/middleware"
 
+	_isHttpDeliver "github.com/auth/identityserver/delivery/http"
+	_isUcase "github.com/auth/identityserver/usecase"
 
+	_userHttpDeliver "github.com/auth/user/delivery/http"
+	_userRepo "github.com/auth/user/repository"
+	_userUcase "github.com/auth/user/usecase"
 )
 
 func main() {
@@ -30,11 +35,21 @@ func main() {
 	//dbName := viper.GetString(`database.name`)
 	//dev db
 
+	//dev env
+	//dev db
 	dbHost := "asparnas.database.windows.net"
 	dbPort := 1433
 	dbUser := "adminasparnas"
 	dbPass := "Standar123"
 	dbName := "asparnas"
+	//dev IS
+	baseUrlis := "http://identitity-server-cgo-dev.azurewebsites.net"
+	//dev URL Forgot Password
+	urlForgotPassword := "http://cgo-web-api-dev.azurewebsites.net/account/change-password"
+	//google auth
+	redirectUrlGoogle := "http://api.dev.cgo.co.id/account/callback"
+	clientIDGoogle := "246939853284-f1san8r9bvsc4soef7in80bdti187op5.apps.googleusercontent.com"
+	clientSecretGoogle := "TF-b8lBN77fiZLzJ3tuG3FFj"
 
 	////dev IS
 	//baseUrlis := "http://identity-server-asparnas.azurewebsites.net"
@@ -44,6 +59,10 @@ func main() {
 	//redirectUrlGoogle := "http://cgo-web-api.azurewebsites.net/account/callback"
 	//clientIDGoogle := "422978617473-acff67dn9cgbomorrbvhqh2i1b6icm84.apps.googleusercontent.com"
 	//clientSecretGoogle := "z_XfHM4DtamjRmJdpu8q0gQf"
+
+	basicAuth := "cm9jbGllbnQ6c2VjcmV0"
+	accountStorage := "cgostorage"
+	accessKeyStorage := "OwvEOlzf6e7QwVoV0H75GuSZHpqHxwhYnYL9QbpVPgBRJn+26K26aRJxtZn7Ip5AhaiIkw9kH11xrZSscavXfQ=="
 
 	connection := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;",
 		dbHost, dbUser, dbPass, dbPort, dbName)
@@ -74,10 +93,15 @@ func main() {
 	}))
 	authorRepo := _authorRepo.NewMysqlAuthorRepository(dbConn)
 	ar := _articleRepo.NewMysqlArticleRepository(dbConn)
-
+	userRepo := _userRepo.NewuserRepository(dbConn)
 
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
+	isUsecase := _isUcase.NewidentityserverUsecase(urlForgotPassword, redirectUrlGoogle, clientIDGoogle, clientSecretGoogle, baseUrlis, basicAuth, accountStorage, accessKeyStorage)
+	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase,timeoutContext)
+
+	_userHttpDeliver.NewuserHandler(e, userUsecase, isUsecase)
+	_isHttpDeliver.NewisHandler(e, userUsecase, isUsecase)
 
 
 	_articleHttpDeliver.NewArticleHandler(e, au)
