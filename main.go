@@ -17,7 +17,8 @@ import (
 	_authorRepo "github.com/bxcodec/go-clean-arch/author/repository"
 	_echoMiddleware "github.com/labstack/echo/middleware"
 
-
+	_isHttpDeliver "github.com/auth/identityserver/delivery/http"
+	_isUcase "github.com/auth/identityserver/usecase"
 )
 
 func main() {
