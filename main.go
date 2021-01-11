@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"time"
 
-	_ "github.com/denisenkom/go-mssqldb"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo"
 	"github.com/spf13/viper"
 
@@ -17,7 +18,12 @@ import (
 	_authorRepo "github.com/bxcodec/go-clean-arch/author/repository"
 	_echoMiddleware "github.com/labstack/echo/middleware"
 
+	_isHttpDeliver "github.com/auth/identityserver/delivery/http"
+	_isUcase "github.com/auth/identityserver/usecase"
 
+	_userHttpDeliver "github.com/auth/user/delivery/http"
+	_userRepo "github.com/auth/user/repository"
+	_userUcase "github.com/auth/user/usecase"
 )
 
 func main() {
@@ -30,11 +36,21 @@ func main() {
 	//dbName := viper.GetString(`database.name`)
 	//dev db
 
-	dbHost := "asparnas.database.windows.net"
-	dbPort := 1433
-	dbUser := "adminasparnas"
-	dbPass := "Standar123"
-	dbName := "asparnas"
+	//dev env
+	//dev db
+	dbHost := "bkni-ri.mysql.database.azure.com"
+	dbPort := "3306"
+	dbUser := "adminbkni@bkni-ri"
+	dbPass := "Standar123."
+	dbName := "sevindo_dev"
+	//dev IS
+	baseUrlis := "https://bkni-identity-server-dev.azurewebsites.net"
+	//dev URL Forgot Password
+	urlForgotPassword := "http://cgo-web-api-dev.azurewebsites.net/account/change-password"
+	//google auth
+	redirectUrlGoogle := "http://api.dev.cgo.co.id/account/callback"
+	clientIDGoogle := "246939853284-f1san8r9bvsc4soef7in80bdti187op5.apps.googleusercontent.com"
+	clientSecretGoogle := "TF-b8lBN77fiZLzJ3tuG3FFj"
 
 	////dev IS
 	//baseUrlis := "http://identity-server-asparnas.azurewebsites.net"
@@ -45,9 +61,16 @@ func main() {
 	//clientIDGoogle := "422978617473-acff67dn9cgbomorrbvhqh2i1b6icm84.apps.googleusercontent.com"
 	//clientSecretGoogle := "z_XfHM4DtamjRmJdpu8q0gQf"
 
-	connection := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;",
-		dbHost, dbUser, dbPass, dbPort, dbName)
-	dbConn, err := sql.Open(`sqlserver`, connection)
+	basicAuth := "cm9jbGllbnQ6c2VjcmV0"
+	accountStorage := "bkniristorage"
+	accessKeyStorage := "/qInIc1r2fMeHHjonpstK8H8HOO5GFIDM4TV/n5+Wk9be3t+UPD4OS0qiVABDIRK5y7XBdlQiHrGyu6M1DDjjQ=="
+
+	connection := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
+	val := url.Values{}
+	val.Add("parseTime", "1")
+	val.Add("loc", "Asia/Jakarta")
+	dsn := fmt.Sprintf("%s?%s", connection, val.Encode())
+	dbConn, err := sql.Open(`mysql`, dsn)
 	if err != nil && viper.GetBool("debug") {
 		fmt.Println(err)
 	}
@@ -74,10 +97,15 @@ func main() {
 	}))
 	authorRepo := _authorRepo.NewMysqlAuthorRepository(dbConn)
 	ar := _articleRepo.NewMysqlArticleRepository(dbConn)
-
+	userRepo := _userRepo.NewuserRepository(dbConn)
 
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
+	isUsecase := _isUcase.NewidentityserverUsecase(urlForgotPassword, redirectUrlGoogle, clientIDGoogle, clientSecretGoogle, baseUrlis, basicAuth, accountStorage, accessKeyStorage)
+	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase,timeoutContext)
+
+	_userHttpDeliver.NewuserHandler(e, userUsecase, isUsecase)
+	_isHttpDeliver.NewisHandler(e, userUsecase, isUsecase)
 
 
 	_articleHttpDeliver.NewArticleHandler(e, au)
