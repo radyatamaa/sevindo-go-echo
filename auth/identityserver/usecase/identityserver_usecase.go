@@ -727,7 +727,7 @@ func (m identityserverUsecase) RequestOTPTmp(phoneNumber string, email string) (
 	if email != "" {
 		pushEmail := models.SendingEmail{
 			Subject: "Verify Email for CGO Registration or Changing Password",
-			Message: "Hi I'm from CGO Indonesia. Your OTP is " + user.OTP + " and it last 5 minutes only. If it fails, try to request again",
+			Message: "Hi I'm from Sevindo. Your OTP is " + user.OTP + " and it last 5 minutes only. If it fails, try to request again",
 			From:    "CGO Indonesia",
 			To:      email,
 		}
@@ -740,7 +740,7 @@ func (m identityserverUsecase) RequestOTPTmp(phoneNumber string, email string) (
 		sms := models.SendingSMS{
 			Source:      "CGO Indonesia",
 			Destination: phoneNumber,
-			Text:        "Hi I'm from CGO Indonesia. Your OTP is " + user.OTP + " and it last 5 minutes only. If it fails, try to request again",
+			Text:        "Hi I'm from Sevindo. Your OTP is " + user.OTP + " and it last 5 minutes only. If it fails, try to request again",
 			Encoding:    "AUTO",
 		}
 		_, err = m.SendingSMS(&sms)
