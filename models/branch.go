@@ -19,19 +19,20 @@ type Branch struct {
 	Address 			string `json:"address"`
 }
 
-type NewCommandBranch struct {
-	Id         string `json:"id" validate:"required"`
-	BranchName string `json:"branch_name"`
-	BranchDesc string `json:"branch_desc"`
+type BranchDto struct {
+	Id                   string     `json:"id" validate:"required"`
+	BranchName 			string `json:"branch_name"`
+	BranchDesc 			string `json:"branch_desc"`
 	BranchPicture 		string `json:"branch_picture"`
 	Balance				float64 `json:"balance"`
 	Address 			string `json:"address"`
 }
 
-type BranchDto struct {
-	Id          string `json:"id" validate:"required"`
-	BranchName string `json:"branch_name"`
-	BranchDesc string `json:"branch_desc"`
+
+type NewCommandBranch struct {
+	Id                   string     `json:"id" validate:"required"`
+	BranchName 			string `json:"branch_name"`
+	BranchDesc 			string `json:"branch_desc"`
 	BranchPicture 		string `json:"branch_picture"`
 	Balance				float64 `json:"balance"`
 	Address 			string `json:"address"`
