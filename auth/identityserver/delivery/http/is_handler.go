@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"github.com/auth/user_admin"
 	"net/http"
 	"strings"
 
@@ -22,11 +23,13 @@ type ResponseError struct {
 type isHandler struct {
 	isUsecase       identityserver.Usecase
 	userUsecase     user.Usecase
+	userAdminUsecase user_admin.Usecase
 }
 
 // NewisHandler will initialize the iss/ resources endpoint
-func NewisHandler(e *echo.Echo,  u user.Usecase, is identityserver.Usecase) {
+func NewisHandler(e *echo.Echo,  u user.Usecase, is identityserver.Usecase,userAdminUsecase user_admin.Usecase) {
 	handler := &isHandler{
+		userAdminUsecase:userAdminUsecase,
 		userUsecase:     u,
 		isUsecase:       is,
 	}
@@ -181,7 +184,16 @@ func (a *isHandler) Login(c echo.Context) error {
 			return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 		}
 		responseToken = token
-	}  else {
+	}else if isLogin.Type == "admin_branch" {
+		isLogin.LoginType = c.Request().Form.Get("login_type")
+
+		token, err := a.userAdminUsecase.Login(ctx, &isLogin)
+
+		if err != nil {
+			return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		}
+		responseToken = token
+	} else {
 		return c.JSON(http.StatusBadRequest, "Bad Request")
 	}
 
@@ -276,7 +288,15 @@ func (a *isHandler) GetInfo(c echo.Context) error {
 		}
 
 		return c.JSON(http.StatusOK, response)
-	} else {
+	} else if typeUser == "admin_branch" {
+		response, err := a.userAdminUsecase.GetUserInfo(ctx, token)
+
+		if err != nil {
+			return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		}
+
+		return c.JSON(http.StatusOK, response)
+	}else {
 		return c.JSON(http.StatusBadRequest, "Bad Request")
 	}
 
