@@ -29,6 +29,10 @@ import (
 	_countryRepo "github.com/master/country/repository"
 	_countryUcase "github.com/master/country/usecase"
 
+	_branchHttpDeliver "github.com/master/branch/delivery/http"
+	_branchRepo "github.com/master/branch/repository"
+	_branchUcase "github.com/master/branch/usecase"
+
 
 )
 
@@ -105,16 +109,19 @@ func main() {
 	ar := _articleRepo.NewMysqlArticleRepository(dbConn)
 	userRepo := _userRepo.NewuserRepository(dbConn)
 	countryRepo := _countryRepo.NewCountryRepository(dbConn)
+	branchRepo := _branchRepo.NewBranchRepository(dbConn)
 
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 	isUsecase := _isUcase.NewidentityserverUsecase(urlForgotPassword, redirectUrlGoogle, clientIDGoogle, clientSecretGoogle, baseUrlis, basicAuth, accountStorage, accessKeyStorage)
 	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase,timeoutContext)
 	countryUsecase := _countryUcase.NewcountryUsecase(countryRepo,timeoutContext)
+	branchUsecase := _branchUcase.NewbranchUsecase(branchRepo,timeoutContext)
 
 	_countryHttpDeliver.NewcountryHandler(e,countryUsecase)
 	_userHttpDeliver.NewuserHandler(e, userUsecase, isUsecase)
 	_isHttpDeliver.NewisHandler(e, userUsecase, isUsecase)
+	_branchHttpDeliver.NewbranchHandler(e,branchUsecase)
 
 
 	_articleHttpDeliver.NewArticleHandler(e, au)
