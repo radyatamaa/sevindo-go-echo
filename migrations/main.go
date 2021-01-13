@@ -81,4 +81,15 @@ func main() {
 		db.Create(&migration)
 	}
 
+	language := model.Language{}
+	errlanguage := db.AutoMigrate(&language)
+	if errlanguage != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table language",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
 }
