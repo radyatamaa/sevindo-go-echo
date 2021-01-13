@@ -44,6 +44,10 @@ import (
 	_userAdminHttpDeliver "github.com/auth/user_admin/delivery/http"
 	_userAdminRepo "github.com/auth/user_admin/repository"
 	_userAdminUcase "github.com/auth/user_admin/usecase"
+
+	_provinceHttpDeliver "github.com/master/province/delivery/http"
+	_provinceRepo "github.com/master/province/repository"
+	_provinceUcase "github.com/master/province/usecase"
 )
 
 func main() {
@@ -123,7 +127,7 @@ func main() {
 	currencyRepo := _currencyRepo.NewCurrencyRepository(dbConn)
 	adminRepo := _userAdminRepo.NewuserAdminRepository(dbConn)
 	languageRepo := _languageRepo.NewLanguageRepository(dbConn)
-
+	provinceRepo := _provinceRepo.NewProvinceRepository(dbConn)
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 	isUsecase := _isUcase.NewidentityserverUsecase(urlForgotPassword, redirectUrlGoogle, clientIDGoogle, clientSecretGoogle, baseUrlis, basicAuth, accountStorage, accessKeyStorage)
@@ -134,6 +138,7 @@ func main() {
 	countryUsecase := _countryUcase.NewcountryUsecase(countryRepo, timeoutContext)
 	adminUsecase := _userAdminUcase.NewuserAdminUsecase(tokenSystem, adminRepo, isUsecase, timeoutContext)
 	languageUsecase := _languageUcase.NewlanguageUsecase(languageRepo, timeoutContext)
+	provinceUsecase := _provinceUcase.NewprovinceUsecase(provinceRepo, timeoutContext)
 	
 	_branchHttpDeliver.NewbranchHandler(e,branchUsecase)
 	_currencyHttpDeliver.NewcurrencyHandler(e, currencyUsecase)
@@ -142,6 +147,7 @@ func main() {
 	_userHttpDeliver.NewuserHandler(e, userUsecase, isUsecase)
 	_isHttpDeliver.NewisHandler(e, userUsecase, isUsecase, adminUsecase)
 	_languageHttpDeliver.NewlanguageHandler(e, languageUsecase)
+	_provinceHttpDeliver.NewprovinceHandler(e, provinceUsecase)
 	_articleHttpDeliver.NewArticleHandler(e, au)
 	log.Fatal(e.Start(":9090"))
 }
