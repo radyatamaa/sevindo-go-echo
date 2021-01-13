@@ -50,4 +50,35 @@ func main() {
 		db.Create(&migration)
 	}
 
+	branch := model.Branch{}
+	errbranch := db.AutoMigrate(&branch)
+	if errbranch != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Branch",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	userAdmin := model.UserAdmin{}
+	erruserAdmin := db.AutoMigrate(&userAdmin).AddForeignKey("branch_id", "branches(id)", "RESTRICT", "RESTRICT")
+	if erruserAdmin != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table User Admin",
+			Date:          time.Now(),
+		}
+		db.Create(&migration)
+	}
+	currency := model.Currency{}
+	errcurrency := db.AutoMigrate(&currency)
+	if errcurrency != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Currency",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
 }

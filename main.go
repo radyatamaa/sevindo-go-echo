@@ -29,7 +29,13 @@ import (
 	_countryRepo "github.com/master/country/repository"
 	_countryUcase "github.com/master/country/usecase"
 
+	_currencyHttpDeliver "github.com/master/currency/delivery/http"
+	_currencyRepo "github.com/master/currency/repository"
+	_currencyUcase "github.com/master/currency/usecase"
 
+	_userAdminHttpDeliver "github.com/auth/user_admin/delivery/http"
+	_userAdminRepo "github.com/auth/user_admin/repository"
+	_userAdminUcase "github.com/auth/user_admin/usecase"
 )
 
 func main() {
@@ -57,7 +63,7 @@ func main() {
 	redirectUrlGoogle := "http://api.dev.cgo.co.id/account/callback"
 	clientIDGoogle := "246939853284-f1san8r9bvsc4soef7in80bdti187op5.apps.googleusercontent.com"
 	clientSecretGoogle := "TF-b8lBN77fiZLzJ3tuG3FFj"
-
+	tokenSystem := "eyJhbGciOiJSUzI1NiIsImtpZCI6IjJmYzU2MjRkYjQ"
 	////dev IS
 	//baseUrlis := "http://identity-server-asparnas.azurewebsites.net"
 	////dev URL Forgot Password
@@ -106,16 +112,31 @@ func main() {
 	userRepo := _userRepo.NewuserRepository(dbConn)
 	countryRepo := _countryRepo.NewCountryRepository(dbConn)
 
+	currencyRepo := _currencyRepo.NewCurrencyRepository(dbConn)
+
+	adminRepo := _userAdminRepo.NewuserAdminRepository(dbConn)
+
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 	isUsecase := _isUcase.NewidentityserverUsecase(urlForgotPassword, redirectUrlGoogle, clientIDGoogle, clientSecretGoogle, baseUrlis, basicAuth, accountStorage, accessKeyStorage)
-	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase,timeoutContext)
-	countryUsecase := _countryUcase.NewcountryUsecase(countryRepo,timeoutContext)
 
-	_countryHttpDeliver.NewcountryHandler(e,countryUsecase)
+	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase, timeoutContext)
+	countryUsecase := _countryUcase.NewcountryUsecase(countryRepo, timeoutContext)
+	currencyUsecase := _currencyUcase.NewcurrencyUsecase(currencyRepo, timeoutContext)
+
+	_countryHttpDeliver.NewcountryHandler(e, countryUsecase)
 	_userHttpDeliver.NewuserHandler(e, userUsecase, isUsecase)
 	_isHttpDeliver.NewisHandler(e, userUsecase, isUsecase)
+	_currencyHttpDeliver.NewcurrencyHandler(e, currencyUsecase)
 
+	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase, timeoutContext)
+	countryUsecase := _countryUcase.NewcountryUsecase(countryRepo, timeoutContext)
+	adminUsecase := _userAdminUcase.NewuserAdminUsecase(tokenSystem, adminRepo, isUsecase, timeoutContext)
+
+	_userAdminHttpDeliver.NewuserAdminHandler(e, adminUsecase, isUsecase)
+	_countryHttpDeliver.NewcountryHandler(e, countryUsecase)
+	_userHttpDeliver.NewuserHandler(e, userUsecase, isUsecase)
+	_isHttpDeliver.NewisHandler(e, userUsecase, isUsecase, adminUsecase)
 
 	_articleHttpDeliver.NewArticleHandler(e, au)
 	log.Fatal(e.Start(":9090"))

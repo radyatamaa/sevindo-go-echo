@@ -54,7 +54,7 @@ func (m identityserverUsecase) ForgotPassword(email string, token string) (*mode
 	pushEmail := models.SendingEmail{
 		Subject: "Forgot Password",
 		Message: "Click this link : " + redirect + " for Change Password",
-		From:    "CGO Indonesia",
+		From:    "Sevindo",
 		To:      email,
 	}
 
@@ -680,9 +680,9 @@ func (m identityserverUsecase) RequestOTP(phoneNumber string) (*models.RequestOT
 	json.NewDecoder(resp.Body).Decode(&user)
 	user.ExpiredInMSecond = 300000
 	sms := models.SendingSMS{
-		Source:      "CGO Indonesia",
+		Source:      "Sevindo",
 		Destination: phoneNumber,
-		Text:        "Hi I'm from CGO Indonesia. Your OTP is " + user.OTP + " and it last 5 minutes only. If it fails, try to request again",
+		Text:        "Hi I'm from Sevindo. Your OTP is " + user.OTP + " and it last 5 minutes only. If it fails, try to request again",
 		Encoding:    "AUTO",
 	}
 	_, err = m.SendingSMS(&sms)
@@ -726,9 +726,9 @@ func (m identityserverUsecase) RequestOTPTmp(phoneNumber string, email string) (
 
 	if email != "" {
 		pushEmail := models.SendingEmail{
-			Subject: "Verify Email for CGO Registration or Changing Password",
-			Message: "Hi I'm from CGO Indonesia. Your OTP is " + user.OTP + " and it last 5 minutes only. If it fails, try to request again",
-			From:    "CGO Indonesia",
+			Subject: "Verify Email for Sevindo Registration or Changing Password",
+			Message: "Hi I'm from Sevindo. Your OTP is " + user.OTP + " and it last 5 minutes only. If it fails, try to request again",
+			From:    "Sevindo",
 			To:      email,
 		}
 
@@ -738,9 +738,9 @@ func (m identityserverUsecase) RequestOTPTmp(phoneNumber string, email string) (
 		}
 	} else if phoneNumber != "" {
 		sms := models.SendingSMS{
-			Source:      "CGO Indonesia",
+			Source:      "Sevindo",
 			Destination: phoneNumber,
-			Text:        "Hi I'm from CGO Indonesia. Your OTP is " + user.OTP + " and it last 5 minutes only. If it fails, try to request again",
+			Text:        "Hi I'm from Sevindo. Your OTP is " + user.OTP + " and it last 5 minutes only. If it fails, try to request again",
 			Encoding:    "AUTO",
 		}
 		_, err = m.SendingSMS(&sms)
