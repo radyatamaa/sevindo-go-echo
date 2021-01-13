@@ -29,7 +29,9 @@ import (
 	_countryRepo "github.com/master/country/repository"
 	_countryUcase "github.com/master/country/usecase"
 
-
+	_currencyHttpDeliver "github.com/master/currency/delivery/http"
+	_currencyRepo "github.com/master/currency/repository"
+	_currencyUcase "github.com/master/currency/usecase"
 )
 
 func main() {
@@ -105,17 +107,19 @@ func main() {
 	ar := _articleRepo.NewMysqlArticleRepository(dbConn)
 	userRepo := _userRepo.NewuserRepository(dbConn)
 	countryRepo := _countryRepo.NewCountryRepository(dbConn)
+	currencyRepo := _currencyRepo.NewCurrencyRepository(dbConn)
 
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 	isUsecase := _isUcase.NewidentityserverUsecase(urlForgotPassword, redirectUrlGoogle, clientIDGoogle, clientSecretGoogle, baseUrlis, basicAuth, accountStorage, accessKeyStorage)
-	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase,timeoutContext)
-	countryUsecase := _countryUcase.NewcountryUsecase(countryRepo,timeoutContext)
+	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase, timeoutContext)
+	countryUsecase := _countryUcase.NewcountryUsecase(countryRepo, timeoutContext)
+	currencyUsecase := _currencyUcase.NewcurrencyUsecase(currencyRepo, timeoutContext)
 
-	_countryHttpDeliver.NewcountryHandler(e,countryUsecase)
+	_countryHttpDeliver.NewcountryHandler(e, countryUsecase)
 	_userHttpDeliver.NewuserHandler(e, userUsecase, isUsecase)
 	_isHttpDeliver.NewisHandler(e, userUsecase, isUsecase)
-
+	_currencyHttpDeliver.NewcurrencyHandler(e, currencyUsecase)
 
 	_articleHttpDeliver.NewArticleHandler(e, au)
 	log.Fatal(e.Start(":9090"))
