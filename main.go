@@ -130,13 +130,13 @@ func main() {
 	provinceRepo := _provinceRepo.NewProvinceRepository(dbConn)
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
-	isUsecase := _isUcase.NewidentityserverUsecase(urlForgotPassword, redirectUrlGoogle, clientIDGoogle, clientSecretGoogle, baseUrlis, basicAuth, accountStorage, accessKeyStorage)
 
+	isUsecase := _isUcase.NewidentityserverUsecase(urlForgotPassword, redirectUrlGoogle, clientIDGoogle, clientSecretGoogle, baseUrlis, basicAuth, accountStorage, accessKeyStorage)
+	adminUsecase := _userAdminUcase.NewuserAdminUsecase(tokenSystem, adminRepo, isUsecase, timeoutContext)
 	branchUsecase := _branchUcase.NewbranchUsecase(branchRepo,timeoutContext)
 	currencyUsecase := _currencyUcase.NewcurrencyUsecase(currencyRepo, timeoutContext)
 	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase, timeoutContext)
-	countryUsecase := _countryUcase.NewcountryUsecase(countryRepo, timeoutContext)
-	adminUsecase := _userAdminUcase.NewuserAdminUsecase(tokenSystem, adminRepo, isUsecase, timeoutContext)
+	countryUsecase := _countryUcase.NewcountryUsecase(adminUsecase,countryRepo,timeoutContext)
 	languageUsecase := _languageUcase.NewlanguageUsecase(languageRepo, timeoutContext)
 	provinceUsecase := _provinceUcase.NewprovinceUsecase(provinceRepo, timeoutContext)
 	

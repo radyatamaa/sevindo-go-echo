@@ -26,3 +26,8 @@ type CountryDto struct {
 	Id          int `json:"id" validate:"required"`
 	CountryName string `json:"country_name"`
 }
+
+type CountryWithPagination struct {
+	Data []*CountryDto  `json:"data"`
+	Meta *MetaPagination `json:"meta"`
+}

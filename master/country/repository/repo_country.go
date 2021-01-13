@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strconv"
 
 	"time"
 
@@ -65,11 +67,11 @@ func (m *countryRepository) fetch(ctx context.Context, query string, args ...int
 
 	return result, nil
 }
-func (m *countryRepository) GetByID(ctx context.Context, id string) (res *models.Country, err error) {
+func (m *countryRepository) GetByID(ctx context.Context, id int) (res *models.Country, err error) {
 	query := `SELECT * FROM countries WHERE `
 
-	if id != "" {
-		query = query + ` id = '` + id + `' `
+	if id != 0 {
+		query = query + ` id = '` + strconv.Itoa(id) + `' `
 	}
 
 	list, err := m.fetch(ctx, query)
@@ -86,12 +88,50 @@ func (m *countryRepository) GetByID(ctx context.Context, id string) (res *models
 	return
 }
 
-func (m *countryRepository) Update(ctx context.Context, ar *models.Country) error {
-	panic("implement me")
+func (m *countryRepository) Update(ctx context.Context, a *models.Country) error {
+	query := `UPDATE countries set modified_by=?, modified_date=? , country_name=?  WHERE id = ?`
+
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return nil
+	}
+
+	res, err := stmt.ExecContext(ctx, a.ModifiedBy, time.Now(), a.CountryName, a.Id)
+	if err != nil {
+		return err
+	}
+	affect, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affect != 1 {
+		err = fmt.Errorf("Weird  Behaviour. Total Affected: %d", affect)
+
+		return err
+	}
+
+	return nil
 }
 
-func (m *countryRepository) Delete(ctx context.Context, id string, deleted_by string) error {
-	panic("implement me")
+func (m *countryRepository) Delete(ctx context.Context, id int, deleted_by string) error {
+	query := `UPDATE countries SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE id =?`
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.ExecContext(ctx, deleted_by, time.Now(), 1, 0, id)
+	if err != nil {
+		return err
+	}
+
+	//lastID, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	//a.Id = lastID
+	return nil
 }
 
 
@@ -145,7 +185,13 @@ func checkCount(rows *sql.Rows) (count int, err error) {
 }
 
 func (m *countryRepository) List(ctx context.Context, limit, offset int) ([]*models.Country, error) {
-	
+	query := `SELECT * FROM countries WHERE is_deleted = 0 and is_active = 1 `
 
-	return nil, nil
+	query = query + ` LIMIT ? OFFSET ?`
+	list, err := m.fetch(ctx, query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return list, nil
 }
