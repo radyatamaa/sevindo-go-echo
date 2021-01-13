@@ -29,6 +29,10 @@ import (
 	_countryRepo "github.com/master/country/repository"
 	_countryUcase "github.com/master/country/usecase"
 
+	_branchHttpDeliver "github.com/master/branch/delivery/http"
+	_branchRepo "github.com/master/branch/repository"
+	_branchUcase "github.com/master/branch/usecase"
+
 	_currencyHttpDeliver "github.com/master/currency/delivery/http"
 	_currencyRepo "github.com/master/currency/repository"
 	_currencyUcase "github.com/master/currency/usecase"
@@ -115,6 +119,7 @@ func main() {
 	ar := _articleRepo.NewMysqlArticleRepository(dbConn)
 	userRepo := _userRepo.NewuserRepository(dbConn)
 	countryRepo := _countryRepo.NewCountryRepository(dbConn)
+	branchRepo := _branchRepo.NewBranchRepository(dbConn)
 	currencyRepo := _currencyRepo.NewCurrencyRepository(dbConn)
 	adminRepo := _userAdminRepo.NewuserAdminRepository(dbConn)
 	languageRepo := _languageRepo.NewLanguageRepository(dbConn)
@@ -122,12 +127,15 @@ func main() {
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 	isUsecase := _isUcase.NewidentityserverUsecase(urlForgotPassword, redirectUrlGoogle, clientIDGoogle, clientSecretGoogle, baseUrlis, basicAuth, accountStorage, accessKeyStorage)
+
+	branchUsecase := _branchUcase.NewbranchUsecase(branchRepo,timeoutContext)
 	currencyUsecase := _currencyUcase.NewcurrencyUsecase(currencyRepo, timeoutContext)
 	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase, timeoutContext)
 	countryUsecase := _countryUcase.NewcountryUsecase(countryRepo, timeoutContext)
 	adminUsecase := _userAdminUcase.NewuserAdminUsecase(tokenSystem, adminRepo, isUsecase, timeoutContext)
 	languageUsecase := _languageUcase.NewlanguageUsecase(languageRepo, timeoutContext)
-
+	
+	_branchHttpDeliver.NewbranchHandler(e,branchUsecase)
 	_currencyHttpDeliver.NewcurrencyHandler(e, currencyUsecase)
 	_userAdminHttpDeliver.NewuserAdminHandler(e, adminUsecase, isUsecase)
 	_countryHttpDeliver.NewcountryHandler(e, countryUsecase)

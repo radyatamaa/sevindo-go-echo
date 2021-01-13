@@ -28,6 +28,7 @@ type BranchDto struct {
 	Address 			string `json:"address"`
 }
 
+
 type NewCommandBranch struct {
 	Id                   string     `json:"id" validate:"required"`
 	BranchName 			string `json:"branch_name"`
