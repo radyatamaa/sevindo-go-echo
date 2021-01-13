@@ -68,6 +68,26 @@ func main() {
 			DescMigration: "Add Table User Admin",
 			Date:          time.Now(),
 		}
+		db.Create(&migration)
+	}
+	currency := model.Currency{}
+	errcurrency := db.AutoMigrate(&currency)
+	if errcurrency != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Currency",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	language := model.Language{}
+	errlanguage := db.AutoMigrate(&language)
+	if errlanguage != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table language",
+			Date:          time.Now(),
+		}
 
 		db.Create(&migration)
 	}
