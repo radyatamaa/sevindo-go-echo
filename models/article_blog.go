@@ -6,8 +6,6 @@ import (
 
 type ArticleBlog struct {
 	Id              int        `json:"id" validate:"required"`
-	Title           string     `json:"title" validate:"required"`
-	Deskripsi       string     `json:"content" validate:"required"`
 	CreatedBy       string     `json:"created_by" validate:"required"`
 	CreatedDate     time.Time  `json:"created_date" validate:"required"`
 	ModifiedBy      *string    `json:"modified_by"`
@@ -17,14 +15,20 @@ type ArticleBlog struct {
 	IsDeleted       int        `json:"is_deleted" validate:"required"`
 	IsActive        int        `json:"is_active" validate:"required"`
 	ArticleBlogName string     `json:"article_blog_name"`
+	Title           string     `json:"title" validate:"required"`
+	Deskripsi       string     `json:"content" validate:"required"`
 }
 
 type NewCommandArticleBlog struct {
 	Id              int    `json:"id" validate:"required"`
 	ArticleBlogName string `json:"article_blog_name"`
+	Title           string `json:"title" validate:"required"`
+	Deskripsi       string `json:"content" validate:"required"`
 }
 
 type ArticleBlogDto struct {
 	Id              int    `json:"id" validate:"required"`
 	ArticleBlogName string `json:"article_blog_name"`
+	Title           string `json:"title" validate:"required"`
+	Deskripsi       string `json:"content" validate:"required"`
 }
