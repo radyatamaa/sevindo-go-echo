@@ -19,4 +19,5 @@ type Resort struct {
 	Status 				int `json:"status"`
 	Rating 				float64 `json:"rating"`
 	CityId 				int `json:"city_id"`
+	BranchId 			string `json:"branch_id"`
 }

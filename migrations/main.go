@@ -146,6 +146,16 @@ func main() {
 		db.Create(&migration)
 	}
 
+	errResort2 := db.Model(&resort).AddForeignKey("branch_id", "branches(id)", "RESTRICT", "RESTRICT")
+	if errResort2 != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add forgen key branch_id Table Resort",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
 	resortRoom := model.ResortRoom{}
 	errresortRoom := db.AutoMigrate(&resortRoom).AddForeignKey("resort_id", "resorts(id)", "RESTRICT", "RESTRICT")
 	if errresortRoom != nil {
