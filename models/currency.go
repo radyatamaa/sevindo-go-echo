@@ -26,3 +26,8 @@ type CurrencyDto struct {
 	Id           int    `json:"id" validate:"required"`
 	CurrencyName string `json:"currency_name"`
 }
+
+type CurrencyWithPagination struct {
+	Data []*CurrencyDto  `json:"data"`
+	Meta *MetaPagination `json:"meta"`
+}
