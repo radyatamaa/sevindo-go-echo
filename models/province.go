@@ -29,3 +29,7 @@ type ProvinceDto struct {
 	ProvinceName string `json:"province_name"`
 	CountryId *int `json:"country_id"`
 }
+type ProvinceWithPagination struct {
+	Data []*ProvinceDto  `json:"data"`
+	Meta *MetaPagination `json:"meta"`
+}

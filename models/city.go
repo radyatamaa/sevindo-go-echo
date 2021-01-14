@@ -12,6 +12,21 @@ type City struct {
 	DeletedDate  *time.Time `json:"deleted_date"`
 	IsDeleted    int        `json:"is_deleted" validate:"required"`
 	IsActive     int        `json:"is_active" validate:"required"`
-	CityName  string     `json:"province_name"`
+	CityName  string     `json:"city_name"`
 	ProvinceId *int `json:"province_id"`
+}
+type NewCommandCity struct {
+	Id          int `json:"id" validate:"required"`
+	CityName string `json:"city_name"`
+	ProvinceId *int `json:"province_id"`
+}
+
+type CityDto struct {
+	Id          int `json:"id" validate:"required"`
+	CityName string `json:"city_name"`
+	ProvinceId *int `json:"province_id"`
+}
+type CityWithPagination struct {
+	Data []*CityDto  `json:"data"`
+	Meta *MetaPagination `json:"meta"`
 }

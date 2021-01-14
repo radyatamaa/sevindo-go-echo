@@ -57,6 +57,10 @@ import (
 	_resortRepo "github.com/services/resort/repository"
 	_resortUcase "github.com/services/resort/usecase"
 
+	_cityHttpDeliver "github.com/master/city/delivery/http"
+	_cityRepo "github.com/master/city/repository"
+	_cityUcase "github.com/master/city/usecase"
+
 	_resortPhotoRepo "github.com/services/resort_photo/repository"
 
 	_roleHttpDeliver "github.com/master/role/delivery/http"
@@ -143,6 +147,7 @@ func main() {
 	languageRepo := _languageRepo.NewLanguageRepository(dbConn)
 	provinceRepo := _provinceRepo.NewProvinceRepository(dbConn)
 	articlecategoryRepo := _articlecategoryRepo.NewArticleCategoryRepository(dbConn)
+	cityRepo := _cityRepo.NewCityRepository(dbConn)
 	resortRepo := _resortRepo.NewresortRepository(dbConn)
 	resortPhotoRepo := _resortPhotoRepo.NewresortPhotoRepository(dbConn)
 	roleRepo := _roleRepo.NewRoleRepository(dbConn)
@@ -159,9 +164,10 @@ func main() {
 	provinceUsecase := _provinceUcase.NewprovinceUsecase(provinceRepo, timeoutContext)
 	roleUsecase := _roleUcase.NewroleUsecase(adminUsecase, roleRepo, timeoutContext)
 	articlecategoryUsecase := _articlecategoryUcase.NewArticleCategoryUsecase(adminUsecase, articlecategoryRepo, timeoutContext)
-
-
 	resortUsecase := _resortUcase.NewresortUsecase(resortPhotoRepo, resortRepo, timeoutContext)
+	provinceUsecase := _provinceUcase.NewprovinceUsecase(adminUsecase,provinceRepo, timeoutContext)
+	cityUsecase := _cityUcase.NewcityUsecase(adminUsecase, cityRepo, timeoutContext)
+	
 	_resortHttpDeliver.NewresortHandler(e, resortUsecase)
 	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)
 	_currencyHttpDeliver.NewcurrencyHandler(e, currencyUsecase)
@@ -173,6 +179,7 @@ func main() {
 	_languageHttpDeliver.NewlanguageHandler(e, languageUsecase)
 	_provinceHttpDeliver.NewprovinceHandler(e, provinceUsecase)
 	_articlecategoryHttpDeliver.NewArticleCategoryHandler(e, articlecategoryUsecase)
+	_cityHttpDeliver.NewcityHandler(e, cityUsecase)
 	_articleHttpDeliver.NewArticleHandler(e, au)
 	_roleHttpDeliver.NewroleHandler(e, roleUsecase)
 	log.Fatal(e.Start(":9090"))
