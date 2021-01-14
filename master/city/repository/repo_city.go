@@ -9,7 +9,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/master/province"
+	"github.com/master/city"
 	"github.com/models"
 )
 
@@ -17,17 +17,17 @@ const (
 	timeFormat = "2006-01-02T15:04:05.999Z07:00" // reduce precision from RFC3339Nano as date format
 )
 
-type provinceRepository struct {
+type cityRepository struct {
 	Conn *sql.DB
 }
 
 
 
 // NewuserRepository will create an object that represent the article.repository interface
-func NewProvinceRepository(Conn *sql.DB) province.Repository {
-	return &provinceRepository{Conn}
+func NewCityRepository(Conn *sql.DB) city.Repository {
+	return &cityRepository{Conn}
 }
-func (m *provinceRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.Province, error) {
+func (m *cityRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.City, error) {
 	rows, err := m.Conn.QueryContext(ctx, query, args...)
 	if err != nil {
 		logrus.Error(err)
@@ -41,9 +41,9 @@ func (m *provinceRepository) fetch(ctx context.Context, query string, args ...in
 		}
 	}()
 
-	result := make([]*models.Province, 0)
+	result := make([]*models.City, 0)
 	for rows.Next() {
-		t := new(models.Province)
+		t := new(models.City)
 		err = rows.Scan(
 			&t.Id,
 			&t.CreatedBy,
@@ -54,8 +54,8 @@ func (m *provinceRepository) fetch(ctx context.Context, query string, args ...in
 			&t.DeletedDate,
 			&t.IsDeleted,
 			&t.IsActive,
-			&t.ProvinceName,
-			&t.CountryId,
+			&t.CityName,
+			&t.ProvinceId,
 		)
 
 		if err != nil {
@@ -67,8 +67,8 @@ func (m *provinceRepository) fetch(ctx context.Context, query string, args ...in
 
 	return result, nil
 }
-func (m *provinceRepository) GetByID(ctx context.Context, id int) (res *models.Province, err error) {
-	query := `SELECT * FROM provinces WHERE `
+func (m *cityRepository) GetByID(ctx context.Context, id int) (res *models.City, err error) {
+	query := `SELECT * FROM cities WHERE `
 
 	if id != 0 {
 		query = query + ` id = '` + strconv.Itoa(id) + `' `
@@ -88,15 +88,15 @@ func (m *provinceRepository) GetByID(ctx context.Context, id int) (res *models.P
 	return
 }
 
-func (m *provinceRepository) Update(ctx context.Context, a *models.Province) error {
-	query := `UPDATE provinces set modified_by=?, modified_date=? , province_name=?, country_id=?  WHERE id = ?`
+func (m *cityRepository) Update(ctx context.Context, a *models.City) error {
+	query := `UPDATE cities set modified_by=?, modified_date=? , city_name=?, province_id=?  WHERE id = ?`
 
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return nil
 	}
 
-	res, err := stmt.ExecContext(ctx, a.ModifiedBy, time.Now(), a.ProvinceName, a.CountryId,a.Id)
+	res, err := stmt.ExecContext(ctx, a.ModifiedBy, time.Now(), a.CityName, a.Id, a.ProvinceId)
 	if err != nil {
 		return err
 	}
@@ -113,8 +113,8 @@ func (m *provinceRepository) Update(ctx context.Context, a *models.Province) err
 	return nil
 }
 
-func (m *provinceRepository) Delete(ctx context.Context, id int, deleted_by string) error {
-	query := `UPDATE provinces SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE id =?`
+func (m *cityRepository) Delete(ctx context.Context, id int, deleted_by string) error {
+	query := `UPDATE cities SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE id =?`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -135,14 +135,14 @@ func (m *provinceRepository) Delete(ctx context.Context, id int, deleted_by stri
 }
 
 
-func (m *provinceRepository) Insert(ctx context.Context, a *models.Province) error {
-	query := `INSERT provinces SET id=? , created_by=? , created_date=? , modified_by=?, modified_date=? , deleted_by=? , deleted_date=? , is_deleted=? , is_active=? ,
-	province_name=?, country_id=?`
+func (m *cityRepository) Insert(ctx context.Context, a *models.City) error {
+	query := `INSERT cities SET id=? , created_by=? , created_date=? , modified_by=?, modified_date=? , deleted_by=? , deleted_date=? , is_deleted=? , is_active=? ,
+	city_name=?, province_id=?`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err
 	}
-	_, err = stmt.ExecContext(ctx, a.Id, a.CreatedBy, time.Now(), nil, nil, nil, nil, 0, 1, a.ProvinceName, a.CountryId)
+	_, err = stmt.ExecContext(ctx, a.Id, a.CreatedBy, time.Now(), nil, nil, nil, nil, 0, 1, a.CityName, a.ProvinceId)
 	if err != nil {
 		return err
 	}
@@ -156,8 +156,8 @@ func (m *provinceRepository) Insert(ctx context.Context, a *models.Province) err
 	return nil
 }
 
-func (m *provinceRepository) Count(ctx context.Context) (int, error) {
-	query := `SELECT count(*) AS count FROM provinces WHERE is_deleted = 0 and is_active = 1`
+func (m *cityRepository) Count(ctx context.Context) (int, error) {
+	query := `SELECT count(*) AS count FROM cities WHERE is_deleted = 0 and is_active = 1`
 
 	rows, err := m.Conn.QueryContext(ctx, query)
 	if err != nil {
@@ -184,7 +184,7 @@ func checkCount(rows *sql.Rows) (count int, err error) {
 	return count, nil
 }
 
-func (m *provinceRepository) List(ctx context.Context, limit, offset int) ([]*models.Province, error) {
+func (m *cityRepository) List(ctx context.Context, limit, offset int) ([]*models.City, error) {
 	
 
 	return nil, nil

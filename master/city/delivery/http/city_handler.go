@@ -1,7 +1,9 @@
 package http
+
 import (
 	"context"
-	"github.com/master/province"
+	"github.com/master/city"
+
 	"net/http"
 	"strconv"
 
@@ -17,26 +19,25 @@ type ResponseError struct {
 	Message string `json:"message"`
 }
 
-// provinceHandler  represent the http handler for province
-type provinceHandler struct {
-	provinceUsecase province.Usecase
+// countryHandler  represent the http handler for country
+type cityHandler struct {
+	cityUsecase city.Usecase
 }
 
-// NewprovinceHandler will initialize the provinces/ resources endpoint
-func NewprovinceHandler(e *echo.Echo, us province.Usecase) {
-	handler := &provinceHandler{
-		provinceUsecase: us,
+// NewcityHandler will initialize the countrys/ resources endpoint
+func NewcityHandler(e *echo.Echo, us city.Usecase) {
+	handler := &cityHandler{
+		cityUsecase: us,
 	}
-	e.POST("/master/province", handler.Create)
-	 e.PUT("/master/province/:id", handler.UpdateProvince)
-	 e.DELETE("/master/province/:id", handler.Delete)
-	// e.GET("/provinces/:id/credit", handler.GetCreditByID)
-	e.GET("/master/province/:id", handler.GetDetailID)
-	 e.GET("/master/province", handler.List)
-
+	e.POST("/master/city", handler.Create)
+	e.PUT("/master/city/:id", handler.UpdateCity)
+	e.DELETE("/master/city/:id", handler.Delete)
+	// e.GET("/countrys/:id/credit", handler.GetCreditByID)
+	e.GET("/master/city/:id", handler.GetDetailID)
+	e.GET("/master/city", handler.List)
 }
 
-func isRequestValid(m *models.NewCommandProvince) (bool, error) {
+func isRequestValid(m *models.NewCommandCity) (bool, error) {
 	validate := validator.New()
 	err := validate.Struct(m)
 	if err != nil {
@@ -44,7 +45,7 @@ func isRequestValid(m *models.NewCommandProvince) (bool, error) {
 	}
 	return true, nil
 }
-func (a *provinceHandler) List(c echo.Context) error {
+func (a *cityHandler) List(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
@@ -70,18 +71,26 @@ func (a *provinceHandler) List(c echo.Context) error {
 		ctx = context.Background()
 	}
 
-	result, err := a.provinceUsecase.List(ctx, page, limit, offset,search)
+	result, err := a.cityUsecase.List(ctx, page, limit, offset,search)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 	return c.JSON(http.StatusOK, result)
 }
-func (a *provinceHandler) Create(c echo.Context) error {
+
+
+func (a *cityHandler) Create(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
-	var province models.NewCommandProvince
-	err := c.Bind(&province)
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
+
+	var city models.NewCommandCity
+	err := c.Bind(&city)
 	if err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, err.Error())
 	}
@@ -91,14 +100,15 @@ func (a *provinceHandler) Create(c echo.Context) error {
 		ctx = context.Background()
 	}
 
-	res,err := a.provinceUsecase.Create(ctx, &province, token)
+	res,err := a.cityUsecase.Create(ctx, &city, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 	return c.JSON(http.StatusOK, res)
 }
 
-func (a *provinceHandler) GetDetailID(c echo.Context) error {
+
+func (a *cityHandler) GetDetailID(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
@@ -109,14 +119,15 @@ func (a *provinceHandler) GetDetailID(c echo.Context) error {
 	if ctx == nil {
 		ctx = context.Background()
 	}
+
 	ids ,_:= strconv.Atoi(id)
-	result, err := a.provinceUsecase.GetById(ctx, ids, token)
+	result, err := a.cityUsecase.GetById(ctx, ids, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 	return c.JSON(http.StatusOK, result)
 }
-func (a *provinceHandler) UpdateProvince(c echo.Context) error {
+func (a *cityHandler) UpdateCity(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
@@ -126,10 +137,10 @@ func (a *provinceHandler) UpdateProvince(c echo.Context) error {
 	}
 
 	id := c.Param("id")
-	var province models.NewCommandProvince
+	var city models.NewCommandCity
 	ids ,_:= strconv.Atoi(id)
-	province.Id = ids
-	err := c.Bind(&province)
+	city.Id = ids
+	err := c.Bind(&city)
 	if err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, err.Error())
 	}
@@ -139,13 +150,14 @@ func (a *provinceHandler) UpdateProvince(c echo.Context) error {
 		ctx = context.Background()
 	}
 
-	err = a.provinceUsecase.Update(ctx, &province, token)
+	err = a.cityUsecase.Update(ctx, &city, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
-	return c.JSON(http.StatusOK, province)
+	return c.JSON(http.StatusOK, city)
 }
-func (a *provinceHandler) Delete (c echo.Context) error {
+
+func (a *cityHandler) Delete (c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
@@ -160,7 +172,7 @@ func (a *provinceHandler) Delete (c echo.Context) error {
 		ctx = context.Background()
 	}
 	ids ,_:= strconv.Atoi(id)
-	result, err := a.provinceUsecase.Delete(ctx, ids, token)
+	result, err := a.cityUsecase.Delete(ctx, ids, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
