@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type Country struct {
+type Province struct {
 	Id           int     `json:"id" validate:"required"`
 	CreatedBy    string     `json:"created_by" validate:"required"`
 	CreatedDate  time.Time  `json:"created_date" validate:"required"`
@@ -14,20 +14,18 @@ type Country struct {
 	DeletedDate  *time.Time `json:"deleted_date"`
 	IsDeleted    int        `json:"is_deleted" validate:"required"`
 	IsActive     int        `json:"is_active" validate:"required"`
-	CountryName  string     `json:"country_name"`
+	ProvinceName  string     `json:"province_name"`
+	CountryId *int `json:"country_id"`
 }
 
-type NewCommandCountry struct {
+type NewCommandProvince struct {
 	Id          int `json:"id" validate:"required"`
-	CountryName string `json:"country_name"`
+	ProvinceName string `json:"province_name"`
+	CountryId *int `json:"country_id"`
 }
 
-type CountryDto struct {
+type ProvinceDto struct {
 	Id          int `json:"id" validate:"required"`
-	CountryName string `json:"country_name"`
-}
-
-type CountryWithPagination struct {
-	Data []*CountryDto  `json:"data"`
-	Meta *MetaPagination `json:"meta"`
+	ProvinceName string `json:"province_name"`
+	CountryId *int `json:"country_id"`
 }

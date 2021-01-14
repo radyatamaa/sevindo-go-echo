@@ -91,5 +91,14 @@ func main() {
 
 		db.Create(&migration)
 	}
+	province := model.Province{}
+	errprovince := db.AutoMigrate(&province).AddForeignKey("country_id", "countries(id)", "RESTRICT", "RESTRICT")
+	if errprovince != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Province",
+			Date:          time.Now(),
+		}
 
+		db.Create(&migration)
+	}
 }
