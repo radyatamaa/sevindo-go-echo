@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strconv"
 
 	"github.com/master/language"
 
@@ -64,11 +66,11 @@ func (m *languageRepository) fetch(ctx context.Context, query string, args ...in
 
 	return result, nil
 }
-func (m *languageRepository) GetByID(ctx context.Context, id string) (res *models.Language, err error) {
+func (m *languageRepository) GetByID(ctx context.Context, id int) (res *models.Language, err error) {
 	query := `SELECT * FROM languages WHERE `
 
-	if id != "" {
-		query = query + ` id = '` + id + `' `
+	if id != 0 {
+		query = query + ` id = '` + strconv.Itoa(id) + `' `
 	}
 
 	list, err := m.fetch(ctx, query)
@@ -86,11 +88,49 @@ func (m *languageRepository) GetByID(ctx context.Context, id string) (res *model
 }
 
 func (m *languageRepository) Update(ctx context.Context, ar *models.Language) error {
-	panic("implement me")
+	query := `UPDATE languages set modified_by=?, modified_date=? , country_name=?  WHERE id = ?`
+
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return nil
+	}
+
+	res, err := stmt.ExecContext(ctx, ar.ModifiedBy, time.Now(), ar.LanguageName, ar.Id)
+	if err != nil {
+		return err
+	}
+	affect, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affect != 1 {
+		err = fmt.Errorf("Weird  Behaviour. Total Affected: %d", affect)
+
+		return err
+	}
+
+	return nil
 }
 
-func (m *languageRepository) Delete(ctx context.Context, id string, deleted_by string) error {
-	panic("implement me")
+func (m *languageRepository) Delete(ctx context.Context, id int, deleted_by string) error {
+	query := `UPDATE languages SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE id =?`
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.ExecContext(ctx, deleted_by, time.Now(), 1, 0, id)
+	if err != nil {
+		return err
+	}
+
+	//lastID, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	//a.Id = lastID
+	return nil
 }
 
 func (m *languageRepository) Insert(ctx context.Context, a *models.Language) error {
@@ -144,5 +184,13 @@ func checkCount(rows *sql.Rows) (count int, err error) {
 
 func (m *languageRepository) List(ctx context.Context, limit, offset int) ([]*models.Language, error) {
 
-	return nil, nil
+	query := `SELECT * FROM languages WHERE is_deleted = 0 and is_active = 1 `
+
+	query = query + ` LIMIT ? OFFSET ?`
+	list, err := m.fetch(ctx, query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return list, nil
 }
