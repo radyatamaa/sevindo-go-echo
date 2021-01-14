@@ -49,9 +49,18 @@ import (
 	_provinceRepo "github.com/master/province/repository"
 	_provinceUcase "github.com/master/province/usecase"
 
+
 	_articlecategoryHttpDeliver "github.com/master/article_category/delivery/http"
 	_articlecategoryRepo "github.com/master/article_category/repository"
 	_articlecategoryUcase "github.com/master/article_category/usecase"
+
+	_resortHttpDeliver "github.com/services/resort/delivery/http"
+	_resortRepo "github.com/services/resort/repository"
+	_resortUcase "github.com/services/resort/usecase"
+
+	_resortPhotoRepo "github.com/services/resort_photo/repository"
+
+
 )
 
 func main() {
@@ -133,6 +142,8 @@ func main() {
 	languageRepo := _languageRepo.NewLanguageRepository(dbConn)
 	provinceRepo := _provinceRepo.NewProvinceRepository(dbConn)
 	articlecategoryRepo := _articlecategoryRepo.NewArticleCategoryRepository(dbConn)
+	resortRepo := _resortRepo.NewresortRepository(dbConn)
+	resortPhotoRepo := _resortPhotoRepo.NewresortPhotoRepository(dbConn)
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
@@ -145,8 +156,10 @@ func main() {
 	languageUsecase := _languageUcase.NewlanguageUsecase(languageRepo, timeoutContext)
 	provinceUsecase := _provinceUcase.NewprovinceUsecase(provinceRepo, timeoutContext)
 	articlecategoryUsecase := _articlecategoryUcase.NewArticleCategoryUsecase(articlecategoryRepo, timeoutContext)
-
 	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)
+	resortUsecase := _resortUcase.NewresortUsecase(resortPhotoRepo,resortRepo,timeoutContext)
+	_resortHttpDeliver.NewresortHandler(e,resortUsecase)
+	_branchHttpDeliver.NewbranchHandler(e,branchUsecase)
 	_currencyHttpDeliver.NewcurrencyHandler(e, currencyUsecase)
 	_userAdminHttpDeliver.NewuserAdminHandler(e, adminUsecase, isUsecase)
 	_countryHttpDeliver.NewcountryHandler(e, countryUsecase)
