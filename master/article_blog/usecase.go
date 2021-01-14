@@ -1,4 +1,4 @@
-package article_category
+package article_blog
 
 import (
 	"github.com/models"
@@ -6,6 +6,9 @@ import (
 )
 
 type Usecase interface {
-	Create(ctx context.Context, ar *models.NewCommandArticleCategory, token string) (*models.NewCommandArticleCategory, error)
-	GetById(ctx context.Context, id string, token string) (*models.ArticleCategoryDto, error)
+	Delete(ctx context.Context, id int, token string) (*models.ResponseDelete, error)
+	Update(ctx context.Context, ar *models.NewCommandArticleBlog, token string) error
+	List(ctx context.Context, page, limit, offset int, search string) (*models.ArticleBlogWithPagination, error)
+	Create(ctx context.Context, ar *models.NewCommandArticleBlog, token string) (*models.NewCommandArticleBlog, error)
+	GetById(ctx context.Context, id int, token string) (*models.ArticleBlogDto, error)
 }

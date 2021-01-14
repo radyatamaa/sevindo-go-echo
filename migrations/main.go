@@ -190,16 +190,16 @@ func main() {
 		db.Create(&migration)
 	}
 
-	// articleblog := model.ArticleBlog{}
-	// errarticleblog := db.AutoMigrate(&articleblog).AddForeignKey("country_id", "countries(id)", "RESTRICT", "RESTRICT")
-	// if errarticleblog != nil {
-	// 	migration := model.MigrationHistory{
-	// 		DescMigration: "Add Table Article Blog",
-	// 		Date:          time.Now(),
-	// 	}
+	articleblog := model.ArticleBlog{}
+	errarticleblog := db.AutoMigrate(&articleblog)
+	if errarticleblog != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Article Blog",
+			Date:          time.Now(),
+		}
 
-	// 	db.Create(&migration)
-	// }
+		db.Create(&migration)
+	}
 
 	articlecategory := model.ArticleCategory{}
 	errarticlecategory := db.AutoMigrate(&articlecategory)
