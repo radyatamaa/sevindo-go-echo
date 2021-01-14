@@ -112,7 +112,16 @@ func main() {
 
 		db.Create(&migration)
 	}
+	districts := model.Districts{}
+	errdistricts := db.AutoMigrate(&districts).AddForeignKey("city_id", "cities(id)", "RESTRICT", "RESTRICT")
+	if errdistricts != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Districts",
+			Date:          time.Now(),
+		}
 
+		db.Create(&migration)
+	}
 	accessibility := model.Accessibility{}
 	erraccessibility := db.AutoMigrate(&accessibility)
 	if erraccessibility != nil {
@@ -136,7 +145,7 @@ func main() {
 	}
 
 	resort := model.Resort{}
-	errResort := db.AutoMigrate(&resort).AddForeignKey("city_id", "cities(id)", "RESTRICT", "RESTRICT")
+	errResort := db.AutoMigrate(&resort).AddForeignKey("districts_id", "districts(id)", "RESTRICT", "RESTRICT")
 	if errResort != nil {
 		migration := model.MigrationHistory{
 			DescMigration: "Add Table Resort",

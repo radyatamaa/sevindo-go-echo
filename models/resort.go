@@ -18,6 +18,6 @@ type Resort struct {
 	ResortLatitude 			float64 `json:"resort_latitude"`
 	Status 				int `json:"status"`
 	Rating 				float64 `json:"rating"`
-	CityId 				int `json:"city_id"`
+	DistrictsId 				int `json:"districts_id"`
 	BranchId 			string `json:"branch_id"`
 }
