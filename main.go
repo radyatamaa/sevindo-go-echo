@@ -48,6 +48,13 @@ import (
 	_provinceHttpDeliver "github.com/master/province/delivery/http"
 	_provinceRepo "github.com/master/province/repository"
 	_provinceUcase "github.com/master/province/usecase"
+
+	_resortHttpDeliver "github.com/services/resort/delivery/http"
+	_resortRepo "github.com/services/resort/repository"
+	_resortUcase "github.com/services/resort/usecase"
+
+	_resortPhotoRepo "github.com/services/resort_photo/repository"
+
 )
 
 func main() {
@@ -128,6 +135,9 @@ func main() {
 	adminRepo := _userAdminRepo.NewuserAdminRepository(dbConn)
 	languageRepo := _languageRepo.NewLanguageRepository(dbConn)
 	provinceRepo := _provinceRepo.NewProvinceRepository(dbConn)
+	resortRepo := _resortRepo.NewresortRepository(dbConn)
+	resortPhotoRepo := _resortPhotoRepo.NewresortPhotoRepository(dbConn)
+
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
@@ -139,7 +149,9 @@ func main() {
 	countryUsecase := _countryUcase.NewcountryUsecase(adminUsecase,countryRepo,timeoutContext)
 	languageUsecase := _languageUcase.NewlanguageUsecase(languageRepo, timeoutContext)
 	provinceUsecase := _provinceUcase.NewprovinceUsecase(provinceRepo, timeoutContext)
-	
+	resortUsecase := _resortUcase.NewresortUsecase(resortPhotoRepo,resortRepo,timeoutContext)
+
+	_resortHttpDeliver.NewresortHandler(e,resortUsecase)
 	_branchHttpDeliver.NewbranchHandler(e,branchUsecase)
 	_currencyHttpDeliver.NewcurrencyHandler(e, currencyUsecase)
 	_userAdminHttpDeliver.NewuserAdminHandler(e, adminUsecase, isUsecase)
