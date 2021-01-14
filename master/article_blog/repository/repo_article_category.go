@@ -3,8 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
-	"strconv"
 
 	"github.com/master/article_category"
 
@@ -66,11 +64,11 @@ func (m *articleCategoryRepository) fetch(ctx context.Context, query string, arg
 
 	return result, nil
 }
-func (m *articleCategoryRepository) GetByID(ctx context.Context, id int) (res *models.ArticleCategory, err error) {
+func (m *articleCategoryRepository) GetByID(ctx context.Context, id string) (res *models.ArticleCategory, err error) {
 	query := `SELECT * FROM article_categories WHERE `
 
-	if id != 0 {
-		query = query + ` id = '` + strconv.Itoa(id) + `' `
+	if id != "" {
+		query = query + ` id = '` + id + `' `
 	}
 
 	list, err := m.fetch(ctx, query)
@@ -88,51 +86,11 @@ func (m *articleCategoryRepository) GetByID(ctx context.Context, id int) (res *m
 }
 
 func (m *articleCategoryRepository) Update(ctx context.Context, ar *models.ArticleCategory) error {
-	query := `UPDATE article_categories set modified_by=?, modified_date=? , country_name=?  WHERE id = ?`
-
-	stmt, err := m.Conn.PrepareContext(ctx, query)
-	if err != nil {
-		return nil
-	}
-
-	res, err := stmt.ExecContext(ctx, ar.ModifiedBy, time.Now(), ar.ArticleCategoryName, ar.Id)
-	if err != nil {
-		return err
-	}
-	affect, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if affect != 1 {
-		err = fmt.Errorf("Weird  Behaviour. Total Affected: %d", affect)
-
-		return err
-	}
-
-	return nil
-
+	panic("implement me")
 }
 
-func (m *articleCategoryRepository) Delete(ctx context.Context, id int, deleted_by string) error {
-	query := `UPDATE article_categories SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE id =?`
-	stmt, err := m.Conn.PrepareContext(ctx, query)
-	if err != nil {
-		return err
-	}
-
-	_, err = stmt.ExecContext(ctx, deleted_by, time.Now(), 1, 0, id)
-	if err != nil {
-		return err
-	}
-
-	//lastID, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	//a.Id = lastID
-	return nil
-
+func (m *articleCategoryRepository) Delete(ctx context.Context, id string, deleted_by string) error {
+	panic("implement me")
 }
 
 func (m *articleCategoryRepository) Insert(ctx context.Context, a *models.ArticleCategory) error {
@@ -186,13 +144,5 @@ func checkCount(rows *sql.Rows) (count int, err error) {
 
 func (m *articleCategoryRepository) List(ctx context.Context, limit, offset int) ([]*models.ArticleCategory, error) {
 
-	query := `SELECT * FROM article_categories WHERE is_deleted = 0 and is_active = 1 `
-
-	query = query + ` LIMIT ? OFFSET ?`
-	list, err := m.fetch(ctx, query, limit, offset)
-	if err != nil {
-		return nil, err
-	}
-
-	return list, nil
+	return nil, nil
 }

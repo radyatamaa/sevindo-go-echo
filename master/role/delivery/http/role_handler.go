@@ -3,10 +3,10 @@ package http
 import (
 	"context"
 	"github.com/labstack/echo"
-	"github.com/master/branch"
+	"github.com/master/role"
 	"github.com/models"
 	"github.com/sirupsen/logrus"
-	validator "gopkg.in/go-playground/validator.v9"
+	"gopkg.in/go-playground/validator.v9"
 	"net/http"
 	"strconv"
 )
@@ -16,26 +16,25 @@ type ResponseError struct {
 	Message string `json:"message"`
 }
 
-// branchHandler  represent the http handler for branch
-type branchHandler struct {
-	branchUsecase branch.Usecase
+// roleHandler  represent the http handler for role
+type roleHandler struct {
+	roleUsecase role.Usecase
 }
 
-// NewbranchHandler will initialize the branchs/ resources endpoint
-func NewbranchHandler(e *echo.Echo, us branch.Usecase) {
-	handler := &branchHandler{
-		branchUsecase: us,
+// NewroleHandler will initialize the roles/ resources endpoint
+func NewroleHandler(e *echo.Echo, us role.Usecase) {
+	handler := &roleHandler{
+		roleUsecase: us,
 	}
-	e.POST("/master/branch", handler.Create)
-	e.PUT("/master/branch/:id", handler.UpdateBranch)
-	e.DELETE("/master/branch/:id", handler.Delete)
+	e.POST("/master/role", handler.Create)
+	e.PUT("/master/role/:id", handler.UpdateRole)
+	e.DELETE("/master/role/:id", handler.Delete)
 	// e.GET("/countrys/:id/credit", handler.GetCreditByID)
-	e.GET("/master/branch/:id", handler.GetDetailID)
-	e.GET("/master/branch", handler.List)
-	//e.POST("/subscribe", handler.Subscribe)
+	e.GET("/master/role/:id", handler.GetDetailID)
+	e.GET("/master/role", handler.List)
 }
 
-func isRequestValid(m *models.NewCommandBranch) (bool, error) {
+func isRequestValid(m *models.NewCommandRole) (bool, error) {
 	validate := validator.New()
 	err := validate.Struct(m)
 	if err != nil {
@@ -43,8 +42,7 @@ func isRequestValid(m *models.NewCommandBranch) (bool, error) {
 	}
 	return true, nil
 }
-
-func (a *branchHandler) Delete(c echo.Context) error {
+func (a *roleHandler) Delete(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
@@ -58,15 +56,15 @@ func (a *branchHandler) Delete(c echo.Context) error {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	//ids ,_:= strconv.Atoi(id)
-	result, err := a.branchUsecase.Delete(ctx, id, token)
+	ids ,_:= strconv.Atoi(id)
+	result, err := a.roleUsecase.Delete(ctx, ids, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 	return c.JSON(http.StatusOK, result)
 }
 
-func (a *branchHandler) List(c echo.Context) error {
+func (a *roleHandler) List(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
@@ -92,14 +90,14 @@ func (a *branchHandler) List(c echo.Context) error {
 		ctx = context.Background()
 	}
 
-	result, err := a.branchUsecase.List(ctx, page, limit, offset,search)
+	result, err := a.roleUsecase.List(ctx, page, limit, offset,search)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 	return c.JSON(http.StatusOK, result)
 }
 
-func (a *branchHandler) UpdateBranch(c echo.Context) error {
+func (a *roleHandler) UpdateRole(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
@@ -109,10 +107,10 @@ func (a *branchHandler) UpdateBranch(c echo.Context) error {
 	}
 
 	id := c.Param("id")
-	var branch models.NewCommandBranch
-	//ids ,_:= strconv.Atoi(id)
-	branch.Id = id
-	err := c.Bind(&branch)
+	var role models.NewCommandRole
+	ids ,_:= strconv.Atoi(id)
+	role.Id = ids
+	err := c.Bind(&role)
 	if err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, err.Error())
 	}
@@ -122,19 +120,25 @@ func (a *branchHandler) UpdateBranch(c echo.Context) error {
 		ctx = context.Background()
 	}
 
-	err = a.branchUsecase.Update(ctx, &branch, token)
+	err = a.roleUsecase.Update(ctx, &role, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
-	return c.JSON(http.StatusOK, branch)
+	return c.JSON(http.StatusOK, role)
 }
 
-func (a *branchHandler) Create(c echo.Context) error {
+func (a *roleHandler) Create(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
-	var branch models.NewCommandBranch
-	err := c.Bind(&branch)
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
+
+	var role models.NewCommandRole
+	err := c.Bind(&role)
 	if err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, err.Error())
 	}
@@ -144,14 +148,14 @@ func (a *branchHandler) Create(c echo.Context) error {
 		ctx = context.Background()
 	}
 
-	res,err := a.branchUsecase.Create(ctx, &branch, token)
+	res,err := a.roleUsecase.Create(ctx, &role, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 	return c.JSON(http.StatusOK, res)
 }
 
-func (a *branchHandler) GetDetailID(c echo.Context) error {
+func (a *roleHandler) GetDetailID(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
@@ -163,7 +167,8 @@ func (a *branchHandler) GetDetailID(c echo.Context) error {
 		ctx = context.Background()
 	}
 
-	result, err := a.branchUsecase.GetById(ctx, id, token)
+	ids ,_:= strconv.Atoi(id)
+	result, err := a.roleUsecase.GetById(ctx, ids, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}

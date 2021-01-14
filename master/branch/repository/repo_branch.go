@@ -3,7 +3,10 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
+
 	"github.com/master/branch"
+
 	"github.com/models"
 	"github.com/sirupsen/logrus"
 	"time"
@@ -87,12 +90,51 @@ func (m *branchRepository) GetByID(ctx context.Context, id string) (res *models.
 	return
 }
 
-func (m *branchRepository) Update(ctx context.Context, ar *models.Branch) error {
-	panic("implement me")
+func (m *branchRepository) Update(ctx context.Context, a *models.Branch) error {
+	query := `UPDATE branches set modified_by=?, modified_date=? , branch_name=?, 
+			  branch_desc=?, branch_picture=?, balance=?, address=? WHERE id = ?`
+
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return nil
+	}
+
+	res, err := stmt.ExecContext(ctx, a.ModifiedBy, time.Now(), a.BranchName, a.BranchDesc, a.BranchPicture, a.Balance, a.Address, a.Id)
+	if err != nil {
+		return err
+	}
+	affect, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affect != 1 {
+		err = fmt.Errorf("Weird  Behaviour. Total Affected: %d", affect)
+
+		return err
+	}
+
+	return nil
 }
 
 func (m *branchRepository) Delete(ctx context.Context, id string, deleted_by string) error {
-	panic("implement me")
+	query := `UPDATE branches SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE id =?`
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.ExecContext(ctx, deleted_by, time.Now(), 1, 0, id)
+	if err != nil {
+		return err
+	}
+
+	//lastID, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	//a.Id = lastID
+	return nil
 }
 
 
@@ -146,7 +188,13 @@ func checkCount(rows *sql.Rows) (count int, err error) {
 }
 
 func (m *branchRepository) List(ctx context.Context, limit, offset int) ([]*models.Branch, error) {
+	query := `SELECT * FROM branches WHERE is_deleted = 0 and is_active = 1 `
 
+	query = query + ` LIMIT ? OFFSET ?`
+	list, err := m.fetch(ctx, query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	return list, nil
 }

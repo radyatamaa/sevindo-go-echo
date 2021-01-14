@@ -49,7 +49,6 @@ import (
 	_provinceRepo "github.com/master/province/repository"
 	_provinceUcase "github.com/master/province/usecase"
 
-
 	_articlecategoryHttpDeliver "github.com/master/article_category/delivery/http"
 	_articlecategoryRepo "github.com/master/article_category/repository"
 	_articlecategoryUcase "github.com/master/article_category/usecase"
@@ -60,7 +59,9 @@ import (
 
 	_resortPhotoRepo "github.com/services/resort_photo/repository"
 
-
+	_roleHttpDeliver "github.com/master/role/delivery/http"
+	_roleRepo "github.com/master/role/repository"
+	_roleUcase "github.com/master/role/usecase"
 )
 
 func main() {
@@ -144,30 +145,35 @@ func main() {
 	articlecategoryRepo := _articlecategoryRepo.NewArticleCategoryRepository(dbConn)
 	resortRepo := _resortRepo.NewresortRepository(dbConn)
 	resortPhotoRepo := _resortPhotoRepo.NewresortPhotoRepository(dbConn)
+	roleRepo := _roleRepo.NewRoleRepository(dbConn)
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
 	isUsecase := _isUcase.NewidentityserverUsecase(urlForgotPassword, redirectUrlGoogle, clientIDGoogle, clientSecretGoogle, baseUrlis, basicAuth, accountStorage, accessKeyStorage)
 	adminUsecase := _userAdminUcase.NewuserAdminUsecase(tokenSystem, adminRepo, isUsecase, timeoutContext)
-	branchUsecase := _branchUcase.NewbranchUsecase(branchRepo, timeoutContext)
-	currencyUsecase := _currencyUcase.NewcurrencyUsecase(currencyRepo, timeoutContext)
+	branchUsecase := _branchUcase.NewbranchUsecase(adminUsecase,branchRepo,timeoutContext)
+	currencyUsecase := _currencyUcase.NewcurrencyUsecase(adminUsecase, currencyRepo, timeoutContext)
 	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase, timeoutContext)
 	countryUsecase := _countryUcase.NewcountryUsecase(adminUsecase, countryRepo, timeoutContext)
-	languageUsecase := _languageUcase.NewlanguageUsecase(languageRepo, timeoutContext)
+	languageUsecase := _languageUcase.NewlanguageUsecase(adminUsecase, languageRepo, timeoutContext)
 	provinceUsecase := _provinceUcase.NewprovinceUsecase(provinceRepo, timeoutContext)
-	articlecategoryUsecase := _articlecategoryUcase.NewArticleCategoryUsecase(articlecategoryRepo, timeoutContext)
+	roleUsecase := _roleUcase.NewroleUsecase(adminUsecase, roleRepo, timeoutContext)
+	articlecategoryUsecase := _articlecategoryUcase.NewArticleCategoryUsecase(adminUsecase, articlecategoryRepo, timeoutContext)
+
+
+	resortUsecase := _resortUcase.NewresortUsecase(resortPhotoRepo, resortRepo, timeoutContext)
+	_resortHttpDeliver.NewresortHandler(e, resortUsecase)
 	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)
-	resortUsecase := _resortUcase.NewresortUsecase(resortPhotoRepo,resortRepo,timeoutContext)
-	_resortHttpDeliver.NewresortHandler(e,resortUsecase)
-	_branchHttpDeliver.NewbranchHandler(e,branchUsecase)
 	_currencyHttpDeliver.NewcurrencyHandler(e, currencyUsecase)
 	_userAdminHttpDeliver.NewuserAdminHandler(e, adminUsecase, isUsecase)
 	_countryHttpDeliver.NewcountryHandler(e, countryUsecase)
+	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)
 	_userHttpDeliver.NewuserHandler(e, userUsecase, isUsecase)
 	_isHttpDeliver.NewisHandler(e, userUsecase, isUsecase, adminUsecase)
 	_languageHttpDeliver.NewlanguageHandler(e, languageUsecase)
 	_provinceHttpDeliver.NewprovinceHandler(e, provinceUsecase)
 	_articlecategoryHttpDeliver.NewArticleCategoryHandler(e, articlecategoryUsecase)
 	_articleHttpDeliver.NewArticleHandler(e, au)
+	_roleHttpDeliver.NewroleHandler(e, roleUsecase)
 	log.Fatal(e.Start(":9090"))
 }

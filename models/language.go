@@ -26,3 +26,8 @@ type LanguageDto struct {
 	Id           int    `json:"id" validate:"required"`
 	LanguageName string `json:"language_name"`
 }
+
+type LanguageWithPagination struct {
+	Data []*LanguageDto  `json:"data"`
+	Meta *MetaPagination `json:"meta"`
+}

@@ -4,30 +4,28 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"strconv"
-
-	"github.com/master/language"
-
-	"time"
-
-	"github.com/sirupsen/logrus"
-
+	"github.com/master/role"
 	"github.com/models"
+	"github.com/sirupsen/logrus"
+	"strconv"
+	"time"
 )
 
 const (
 	timeFormat = "2006-01-02T15:04:05.999Z07:00" // reduce precision from RFC3339Nano as date format
 )
 
-type languageRepository struct {
+type roleRepository struct {
 	Conn *sql.DB
 }
 
+
+
 // NewuserRepository will create an object that represent the article.repository interface
-func NewLanguageRepository(Conn *sql.DB) language.Repository {
-	return &languageRepository{Conn}
+func NewRoleRepository(Conn *sql.DB) role.Repository {
+	return &roleRepository{Conn}
 }
-func (m *languageRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.Language, error) {
+func (m *roleRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.Role, error) {
 	rows, err := m.Conn.QueryContext(ctx, query, args...)
 	if err != nil {
 		logrus.Error(err)
@@ -41,9 +39,9 @@ func (m *languageRepository) fetch(ctx context.Context, query string, args ...in
 		}
 	}()
 
-	result := make([]*models.Language, 0)
+	result := make([]*models.Role, 0)
 	for rows.Next() {
-		t := new(models.Language)
+		t := new(models.Role)
 		err = rows.Scan(
 			&t.Id,
 			&t.CreatedBy,
@@ -54,7 +52,9 @@ func (m *languageRepository) fetch(ctx context.Context, query string, args ...in
 			&t.DeletedDate,
 			&t.IsDeleted,
 			&t.IsActive,
-			&t.LanguageName,
+			&t.RoleName,
+			&t.RoleType,
+			&t.Description,
 		)
 
 		if err != nil {
@@ -66,8 +66,8 @@ func (m *languageRepository) fetch(ctx context.Context, query string, args ...in
 
 	return result, nil
 }
-func (m *languageRepository) GetByID(ctx context.Context, id int) (res *models.Language, err error) {
-	query := `SELECT * FROM languages WHERE `
+func (m *roleRepository) GetByID(ctx context.Context, id int) (res *models.Role, err error) {
+	query := `SELECT * FROM roles WHERE `
 
 	if id != 0 {
 		query = query + ` id = '` + strconv.Itoa(id) + `' `
@@ -87,15 +87,15 @@ func (m *languageRepository) GetByID(ctx context.Context, id int) (res *models.L
 	return
 }
 
-func (m *languageRepository) Update(ctx context.Context, ar *models.Language) error {
-	query := `UPDATE languages set modified_by=?, modified_date=? , country_name=?  WHERE id = ?`
+func (m *roleRepository) Update(ctx context.Context, a *models.Role) error {
+	query := `UPDATE roles set modified_by=?, modified_date=? , role_name=?, role_type=?, description=?  WHERE id = ?`
 
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return nil
 	}
 
-	res, err := stmt.ExecContext(ctx, ar.ModifiedBy, time.Now(), ar.LanguageName, ar.Id)
+	res, err := stmt.ExecContext(ctx, a.ModifiedBy, time.Now(), a.RoleName, a.RoleType, a.Description, a.Id)
 	if err != nil {
 		return err
 	}
@@ -112,8 +112,8 @@ func (m *languageRepository) Update(ctx context.Context, ar *models.Language) er
 	return nil
 }
 
-func (m *languageRepository) Delete(ctx context.Context, id int, deleted_by string) error {
-	query := `UPDATE languages SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE id =?`
+func (m *roleRepository) Delete(ctx context.Context, id int, deleted_by string) error {
+	query := `UPDATE roles SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE id =?`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -133,14 +133,15 @@ func (m *languageRepository) Delete(ctx context.Context, id int, deleted_by stri
 	return nil
 }
 
-func (m *languageRepository) Insert(ctx context.Context, a *models.Language) error {
-	query := `INSERT languages SET id=? , created_by=? , created_date=? , modified_by=?, modified_date=? , deleted_by=? , deleted_date=? , is_deleted=? , is_active=? ,
-	language_name=?`
+
+func (m *roleRepository) Insert(ctx context.Context, a *models.Role) error {
+	query := `INSERT roles SET id=? , created_by=? , created_date=? , modified_by=?, modified_date=? , deleted_by=? , deleted_date=? , is_deleted=? , is_active=? ,
+	role_name=? , role_type=? , description=?`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err
 	}
-	_, err = stmt.ExecContext(ctx, a.Id, a.CreatedBy, time.Now(), nil, nil, nil, nil, 0, 1, a.LanguageName)
+	_, err = stmt.ExecContext(ctx, a.Id, a.CreatedBy, time.Now(), nil, nil, nil, nil, 0, 1, a.RoleName, a.RoleType, a.Description)
 	if err != nil {
 		return err
 	}
@@ -154,8 +155,8 @@ func (m *languageRepository) Insert(ctx context.Context, a *models.Language) err
 	return nil
 }
 
-func (m *languageRepository) Count(ctx context.Context) (int, error) {
-	query := `SELECT count(*) AS count FROM languages WHERE is_deleted = 0 and is_active = 1`
+func (m *roleRepository) Count(ctx context.Context) (int, error) {
+	query := `SELECT count(*) AS count FROM roles WHERE is_deleted = 0 and is_active = 1`
 
 	rows, err := m.Conn.QueryContext(ctx, query)
 	if err != nil {
@@ -182,9 +183,8 @@ func checkCount(rows *sql.Rows) (count int, err error) {
 	return count, nil
 }
 
-func (m *languageRepository) List(ctx context.Context, limit, offset int) ([]*models.Language, error) {
-
-	query := `SELECT * FROM languages WHERE is_deleted = 0 and is_active = 1 `
+func (m *roleRepository) List(ctx context.Context, limit, offset int) ([]*models.Role, error) {
+	query := `SELECT * FROM roles WHERE is_deleted = 0 and is_active = 1 `
 
 	query = query + ` LIMIT ? OFFSET ?`
 	list, err := m.fetch(ctx, query, limit, offset)
