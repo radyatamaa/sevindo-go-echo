@@ -3,7 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"github.com/master/currency"
+	"fmt"
+	"strconv"
 
 	"time"
 
@@ -21,7 +22,7 @@ type currencyRepository struct {
 }
 
 // NewuserRepository will create an object that represent the article.repository interface
-func NewCurrencyRepository(Conn *sql.DB) currency.Repository {
+func NewCurrencyRepository(Conn *sql.DB) *currencyRepository {
 	return &currencyRepository{Conn}
 }
 func (m *currencyRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.Currency, error) {
@@ -63,11 +64,11 @@ func (m *currencyRepository) fetch(ctx context.Context, query string, args ...in
 
 	return result, nil
 }
-func (m *currencyRepository) GetByID(ctx context.Context, id string) (res *models.Currency, err error) {
+func (m *currencyRepository) GetByID(ctx context.Context, id int) (res *models.Currency, err error) {
 	query := `SELECT * FROM currencies WHERE `
 
-	if id != "" {
-		query = query + ` id = '` + id + `' `
+	if id != 0 {
+		query = query + ` id = '` + strconv.Itoa(id) + `' `
 	}
 
 	list, err := m.fetch(ctx, query)
@@ -84,12 +85,50 @@ func (m *currencyRepository) GetByID(ctx context.Context, id string) (res *model
 	return
 }
 
-func (m *currencyRepository) Update(ctx context.Context, ar *models.Currency) error {
-	panic("implement me")
+func (m *currencyRepository) Update(ctx context.Context, a *models.Currency) error {
+	query := `UPDATE currencies set modified_by=?, modified_date=? , currency_name=?  WHERE id = ?`
+
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return nil
+	}
+
+	res, err := stmt.ExecContext(ctx, a.ModifiedBy, time.Now(), a.CurrencyName, a.Id)
+	if err != nil {
+		return err
+	}
+	affect, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affect != 1 {
+		err = fmt.Errorf("Weird  Behaviour. Total Affected: %d", affect)
+
+		return err
+	}
+
+	return nil
 }
 
-func (m *currencyRepository) Delete(ctx context.Context, id string, deleted_by string) error {
-	panic("implement me")
+func (m *currencyRepository) Delete(ctx context.Context, id int, deleted_by string) error {
+	query := `UPDATE currencies SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE id =?`
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.ExecContext(ctx, deleted_by, time.Now(), 1, 0, id)
+	if err != nil {
+		return err
+	}
+
+	//lastID, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	//a.Id = lastID
+	return nil
 }
 
 func (m *currencyRepository) Insert(ctx context.Context, a *models.Currency) error {
@@ -142,6 +181,13 @@ func checkCount(rows *sql.Rows) (count int, err error) {
 }
 
 func (m *currencyRepository) List(ctx context.Context, limit, offset int) ([]*models.Currency, error) {
+	query := `SELECT * FROM currencies WHERE is_deleted = 0 and is_active = 1 `
 
-	return nil, nil
+	query = query + ` LIMIT ? OFFSET ?`
+	list, err := m.fetch(ctx, query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return list, nil
 }

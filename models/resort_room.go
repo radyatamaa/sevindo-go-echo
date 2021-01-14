@@ -15,6 +15,6 @@ type ResortRoom struct {
 	ResortRoomTitle				string `json:"resort_title"`
 	ResortRoomDesc				string `json:"resort_desc"`
 	ResortMaximumBookingAmount int `json:"resort_maximum_booking_amount"`
-	ResortImage 	 string `json:"resort_image"`
 	ResortId 			string `json:"resort_id"`
+	ResortCapacity				int `json:"resort_capacity"`
 }
