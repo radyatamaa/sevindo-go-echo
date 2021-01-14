@@ -15,17 +15,17 @@ type Province struct {
 	IsDeleted    int        `json:"is_deleted" validate:"required"`
 	IsActive     int        `json:"is_active" validate:"required"`
 	ProvinceName  string     `json:"province_name"`
-	CountryId int `json:"country_id"`
+	CountryId *int `json:"country_id"`
 }
 
 type NewCommandProvince struct {
 	Id          int `json:"id" validate:"required"`
 	ProvinceName string `json:"province_name"`
-	CountryId int `json:"country_id"`
+	CountryId *int `json:"country_id"`
 }
 
 type ProvinceDto struct {
 	Id          int `json:"id" validate:"required"`
 	ProvinceName string `json:"province_name"`
-	CountryId int `json:"country_id"`
+	CountryId *int `json:"country_id"`
 }

@@ -1,10 +1,8 @@
 package models
 
-import (
-	"time"
-)
+import "time"
 
-type Country struct {
+type Accessibility struct {
 	Id           int     `json:"id" validate:"required"`
 	CreatedBy    string     `json:"created_by" validate:"required"`
 	CreatedDate  time.Time  `json:"created_date" validate:"required"`
@@ -14,20 +12,5 @@ type Country struct {
 	DeletedDate  *time.Time `json:"deleted_date"`
 	IsDeleted    int        `json:"is_deleted" validate:"required"`
 	IsActive     int        `json:"is_active" validate:"required"`
-	CountryName  string     `json:"country_name"`
-}
-
-type NewCommandCountry struct {
-	Id          int `json:"id" validate:"required"`
-	CountryName string `json:"country_name"`
-}
-
-type CountryDto struct {
-	Id          int `json:"id" validate:"required"`
-	CountryName string `json:"country_name"`
-}
-
-type CountryWithPagination struct {
-	Data []*CountryDto  `json:"data"`
-	Meta *MetaPagination `json:"meta"`
+	Name  string `json:"name"`
 }
