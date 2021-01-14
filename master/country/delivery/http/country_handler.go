@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/master/country"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
@@ -28,12 +29,11 @@ func NewcountryHandler(e *echo.Echo, us country.Usecase) {
 		countryUsecase: us,
 	}
 	e.POST("/master/country", handler.Create)
-	// e.PUT("/countrys/:id", handler.UpdateCountry)
-	// e.DELETE("/countrys/:id", handler.Delete)
+	e.PUT("/master/country/:id", handler.UpdateCountry)
+	e.DELETE("/master/country/:id", handler.Delete)
 	// e.GET("/countrys/:id/credit", handler.GetCreditByID)
 	e.GET("/master/country/:id", handler.GetDetailID)
-	// e.GET("/countrys", handler.List)
-	//e.POST("/subscribe", handler.Subscribe)
+	e.GET("/master/country", handler.List)
 }
 
 func isRequestValid(m *models.NewCommandCountry) (bool, error) {
@@ -44,11 +44,101 @@ func isRequestValid(m *models.NewCommandCountry) (bool, error) {
 	}
 	return true, nil
 }
+func (a *countryHandler) Delete(c echo.Context) error {
+	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
+	id := c.Param("id")
+	ctx := c.Request().Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	ids ,_:= strconv.Atoi(id)
+	result, err := a.countryUsecase.Delete(ctx, ids, token)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
+func (a *countryHandler) List(c echo.Context) error {
+	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
+	qpage := c.QueryParam("page")
+	qperPage := c.QueryParam("size")
+	search := c.QueryParam("search")
+
+	var limit = 20
+	var page = 1
+	var offset = 0
+
+	page, _ = strconv.Atoi(qpage)
+	limit, _ = strconv.Atoi(qperPage)
+	offset = (page - 1) * limit
+
+	ctx := c.Request().Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	result, err := a.countryUsecase.List(ctx, page, limit, offset,search)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
+func (a *countryHandler) UpdateCountry(c echo.Context) error {
+	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
+	id := c.Param("id")
+	var country models.NewCommandCountry
+	ids ,_:= strconv.Atoi(id)
+	country.Id = ids
+	err := c.Bind(&country)
+	if err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+	}
+
+	ctx := c.Request().Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	err = a.countryUsecase.Update(ctx, &country, token)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, country)
+}
 
 func (a *countryHandler) Create(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
+
 	var country models.NewCommandCountry
 	err := c.Bind(&country)
 	if err != nil {
@@ -79,7 +169,8 @@ func (a *countryHandler) GetDetailID(c echo.Context) error {
 		ctx = context.Background()
 	}
 
-	result, err := a.countryUsecase.GetById(ctx, id, token)
+	ids ,_:= strconv.Atoi(id)
+	result, err := a.countryUsecase.GetById(ctx, ids, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
