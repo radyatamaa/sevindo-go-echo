@@ -66,6 +66,10 @@ import (
 	_roleHttpDeliver "github.com/master/role/delivery/http"
 	_roleRepo "github.com/master/role/repository"
 	_roleUcase "github.com/master/role/usecase"
+
+	_bankHttpDeliver "github.com/master/bank/delivery/http"
+	_bankRepo "github.com/master/bank/repository"
+	_bankUcase "github.com/master/bank/usecase"
 )
 
 func main() {
@@ -151,6 +155,7 @@ func main() {
 	resortRepo := _resortRepo.NewresortRepository(dbConn)
 	resortPhotoRepo := _resortPhotoRepo.NewresortPhotoRepository(dbConn)
 	roleRepo := _roleRepo.NewRoleRepository(dbConn)
+	bankRepo := _bankRepo.NewBankRepository(dbConn)
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
@@ -161,13 +166,13 @@ func main() {
 	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase, timeoutContext)
 	countryUsecase := _countryUcase.NewcountryUsecase(adminUsecase, countryRepo, timeoutContext)
 	languageUsecase := _languageUcase.NewlanguageUsecase(adminUsecase, languageRepo, timeoutContext)
-	provinceUsecase := _provinceUcase.NewprovinceUsecase(provinceRepo, timeoutContext)
 	roleUsecase := _roleUcase.NewroleUsecase(adminUsecase, roleRepo, timeoutContext)
 	articlecategoryUsecase := _articlecategoryUcase.NewArticleCategoryUsecase(adminUsecase, articlecategoryRepo, timeoutContext)
 	resortUsecase := _resortUcase.NewresortUsecase(resortPhotoRepo, resortRepo, timeoutContext)
 	provinceUsecase := _provinceUcase.NewprovinceUsecase(adminUsecase,provinceRepo, timeoutContext)
 	cityUsecase := _cityUcase.NewcityUsecase(adminUsecase, cityRepo, timeoutContext)
-	
+	bankUsecase := _bankUcase.NewbankUsecase(adminUsecase, bankRepo, timeoutContext)
+
 	_resortHttpDeliver.NewresortHandler(e, resortUsecase)
 	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)
 	_currencyHttpDeliver.NewcurrencyHandler(e, currencyUsecase)
@@ -182,5 +187,6 @@ func main() {
 	_cityHttpDeliver.NewcityHandler(e, cityUsecase)
 	_articleHttpDeliver.NewArticleHandler(e, au)
 	_roleHttpDeliver.NewroleHandler(e, roleUsecase)
+	_bankHttpDeliver.NewbankHandler(e, bankUsecase)
 	log.Fatal(e.Start(":9090"))
 }

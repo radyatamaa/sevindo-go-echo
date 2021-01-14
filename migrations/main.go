@@ -276,4 +276,15 @@ func main() {
 		db.Create(&migration)
 	}
 
+	bank := model.Bank{}
+	errbank := db.AutoMigrate(&bank)
+	if errbank != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Bank",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
 }
