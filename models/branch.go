@@ -14,7 +14,7 @@ type Branch struct {
 	IsActive             int        `json:"is_active" validate:"required"`
 	BranchName 			string `json:"branch_name"`
 	BranchDesc 			string `json:"branch_desc"`
-	BranchPicture 		string `json:"branch_picture"`
+	BranchPicture 		*string `json:"branch_picture"`
 	Balance				float64 `json:"balance"`
 	Address 			string `json:"address"`
 }
@@ -23,7 +23,7 @@ type BranchDto struct {
 	Id                   string     `json:"id" validate:"required"`
 	BranchName 			string `json:"branch_name"`
 	BranchDesc 			string `json:"branch_desc"`
-	BranchPicture 		string `json:"branch_picture"`
+	BranchPicture 		*string `json:"branch_picture"`
 	Balance				float64 `json:"balance"`
 	Address 			string `json:"address"`
 }
@@ -33,7 +33,12 @@ type NewCommandBranch struct {
 	Id                   string     `json:"id" validate:"required"`
 	BranchName 			string `json:"branch_name"`
 	BranchDesc 			string `json:"branch_desc"`
-	BranchPicture 		string `json:"branch_picture"`
+	BranchPicture 		*string `json:"branch_picture"`
 	Balance				float64 `json:"balance"`
 	Address 			string `json:"address"`
+}
+
+type BranchWithPagination struct {
+	Data []*BranchDto  `json:"data"`
+	Meta *MetaPagination `json:"meta"`
 }
