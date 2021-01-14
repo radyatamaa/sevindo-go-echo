@@ -145,7 +145,7 @@ func main() {
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
 	isUsecase := _isUcase.NewidentityserverUsecase(urlForgotPassword, redirectUrlGoogle, clientIDGoogle, clientSecretGoogle, baseUrlis, basicAuth, accountStorage, accessKeyStorage)
-	adminUsecase := _userAdminUcase.NewuserAdminUsecase(tokenSystem, adminRepo, isUsecase, timeoutContext)1
+	adminUsecase := _userAdminUcase.NewuserAdminUsecase(tokenSystem, adminRepo, isUsecase, timeoutContext)
 	branchUsecase := _branchUcase.NewbranchUsecase(adminUsecase,branchRepo,timeoutContext)
 	currencyUsecase := _currencyUcase.NewcurrencyUsecase(adminUsecase, currencyRepo, timeoutContext)
 	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase, timeoutContext)
