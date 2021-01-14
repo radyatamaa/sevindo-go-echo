@@ -31,3 +31,4 @@ type CurrencyWithPagination struct {
 	Data []*CurrencyDto  `json:"data"`
 	Meta *MetaPagination `json:"meta"`
 }
+
