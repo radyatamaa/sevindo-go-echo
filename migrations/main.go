@@ -91,6 +91,7 @@ func main() {
 
 		db.Create(&migration)
 	}
+
 	province := model.Province{}
 	errprovince := db.AutoMigrate(&province).AddForeignKey("country_id", "countries(id)", "RESTRICT", "RESTRICT")
 	if errprovince != nil {
@@ -112,6 +113,7 @@ func main() {
 
 		db.Create(&migration)
 	}
+
 	districts := model.Districts{}
 	errdistricts := db.AutoMigrate(&districts).AddForeignKey("city_id", "cities(id)", "RESTRICT", "RESTRICT")
 	if errdistricts != nil {
@@ -122,6 +124,7 @@ func main() {
 
 		db.Create(&migration)
 	}
+
 	accessibility := model.Accessibility{}
 	erraccessibility := db.AutoMigrate(&accessibility)
 	if erraccessibility != nil {
@@ -187,6 +190,28 @@ func main() {
 		db.Create(&migration)
 	}
 
+	// articleblog := model.ArticleBlog{}
+	// errarticleblog := db.AutoMigrate(&articleblog).AddForeignKey("country_id", "countries(id)", "RESTRICT", "RESTRICT")
+	// if errarticleblog != nil {
+	// 	migration := model.MigrationHistory{
+	// 		DescMigration: "Add Table Article Blog",
+	// 		Date:          time.Now(),
+	// 	}
+
+	// 	db.Create(&migration)
+	// }
+
+	articlecategory := model.ArticleCategory{}
+	errarticlecategory := db.AutoMigrate(&articlecategory)
+	if errarticlecategory != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Article Category",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
 	erraccessibilityResortRoom2 := db.Model(&accessibilityResortRoom).AddForeignKey("accessibility_id", "accessibilities(id)", "RESTRICT", "RESTRICT")
 	if erraccessibilityResortRoom2 != nil {
 		migration := model.MigrationHistory{
@@ -196,7 +221,6 @@ func main() {
 
 		db.Create(&migration)
 	}
-
 
 	amenitiesResortRoom := model.AmenitiesResortRoom{}
 	erramenitiesResortRoom := db.AutoMigrate(&amenitiesResortRoom).AddForeignKey("resort_room_id", "resort_rooms(id)", "RESTRICT", "RESTRICT")
