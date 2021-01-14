@@ -58,6 +58,10 @@ import (
 	_resortUcase "github.com/services/resort/usecase"
 
 	_resortPhotoRepo "github.com/services/resort_photo/repository"
+
+	_roleHttpDeliver "github.com/master/role/delivery/http"
+	_roleRepo "github.com/master/role/repository"
+	_roleUcase "github.com/master/role/usecase"
 )
 
 func main() {
@@ -141,6 +145,7 @@ func main() {
 	articlecategoryRepo := _articlecategoryRepo.NewArticleCategoryRepository(dbConn)
 	resortRepo := _resortRepo.NewresortRepository(dbConn)
 	resortPhotoRepo := _resortPhotoRepo.NewresortPhotoRepository(dbConn)
+	roleRepo := _roleRepo.NewRoleRepository(dbConn)
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
@@ -153,6 +158,7 @@ func main() {
 	languageUsecase := _languageUcase.NewlanguageUsecase(adminUsecase, languageRepo, timeoutContext)
 	provinceUsecase := _provinceUcase.NewprovinceUsecase(provinceRepo, timeoutContext)
 	articlecategoryUsecase := _articlecategoryUcase.NewArticleCategoryUsecase(articlecategoryRepo, timeoutContext)
+	roleUsecase := _roleUcase.NewroleUsecase(adminUsecase, roleRepo, timeoutContext)
 
 	resortUsecase := _resortUcase.NewresortUsecase(resortPhotoRepo, resortRepo, timeoutContext)
 	_resortHttpDeliver.NewresortHandler(e, resortUsecase)
@@ -167,5 +173,6 @@ func main() {
 	_provinceHttpDeliver.NewprovinceHandler(e, provinceUsecase)
 	_articlecategoryHttpDeliver.NewArticleCategoryHandler(e, articlecategoryUsecase)
 	_articleHttpDeliver.NewArticleHandler(e, au)
+	_roleHttpDeliver.NewroleHandler(e, roleUsecase)
 	log.Fatal(e.Start(":9090"))
 }
