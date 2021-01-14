@@ -145,11 +145,12 @@ func main() {
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
 	isUsecase := _isUcase.NewidentityserverUsecase(urlForgotPassword, redirectUrlGoogle, clientIDGoogle, clientSecretGoogle, baseUrlis, basicAuth, accountStorage, accessKeyStorage)
-	adminUsecase := _userAdminUcase.NewuserAdminUsecase(tokenSystem, adminRepo, isUsecase, timeoutContext)
-	branchUsecase := _branchUcase.NewbranchUsecase(branchRepo, timeoutContext)
+	adminUsecase := _userAdminUcase.NewuserAdminUsecase(tokenSystem, adminRepo, isUsecase, timeoutContext)1
+	branchUsecase := _branchUcase.NewbranchUsecase(adminUsecase,branchRepo,timeoutContext)
 	currencyUsecase := _currencyUcase.NewcurrencyUsecase(adminUsecase, currencyRepo, timeoutContext)
 	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase, timeoutContext)
 	countryUsecase := _countryUcase.NewcountryUsecase(adminUsecase, countryRepo, timeoutContext)
+
 	languageUsecase := _languageUcase.NewlanguageUsecase(languageRepo, timeoutContext)
 	provinceUsecase := _provinceUcase.NewprovinceUsecase(provinceRepo, timeoutContext)
 	articlecategoryUsecase := _articlecategoryUcase.NewArticleCategoryUsecase(articlecategoryRepo, timeoutContext)
@@ -160,6 +161,7 @@ func main() {
 	_currencyHttpDeliver.NewcurrencyHandler(e, currencyUsecase)
 	_userAdminHttpDeliver.NewuserAdminHandler(e, adminUsecase, isUsecase)
 	_countryHttpDeliver.NewcountryHandler(e, countryUsecase)
+	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)
 	_userHttpDeliver.NewuserHandler(e, userUsecase, isUsecase)
 	_isHttpDeliver.NewisHandler(e, userUsecase, isUsecase, adminUsecase)
 	_languageHttpDeliver.NewlanguageHandler(e, languageUsecase)
