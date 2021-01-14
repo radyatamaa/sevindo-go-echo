@@ -157,8 +157,9 @@ func main() {
 	countryUsecase := _countryUcase.NewcountryUsecase(adminUsecase, countryRepo, timeoutContext)
 	languageUsecase := _languageUcase.NewlanguageUsecase(adminUsecase, languageRepo, timeoutContext)
 	provinceUsecase := _provinceUcase.NewprovinceUsecase(provinceRepo, timeoutContext)
-	articlecategoryUsecase := _articlecategoryUcase.NewArticleCategoryUsecase(articlecategoryRepo, timeoutContext)
 	roleUsecase := _roleUcase.NewroleUsecase(adminUsecase, roleRepo, timeoutContext)
+	articlecategoryUsecase := _articlecategoryUcase.NewArticleCategoryUsecase(adminUsecase, articlecategoryRepo, timeoutContext)
+
 
 	resortUsecase := _resortUcase.NewresortUsecase(resortPhotoRepo, resortRepo, timeoutContext)
 	_resortHttpDeliver.NewresortHandler(e, resortUsecase)
