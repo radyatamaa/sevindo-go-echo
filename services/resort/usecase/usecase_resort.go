@@ -72,6 +72,23 @@ func (m resortUsecase) GetDetail(ctx context.Context, id string) (*models.Resort
 		BranchName:      list[0].BranchName,
 		ResortRoom:      nil,
 		ResortPhoto:     nil,
+		ReviewAmount:0,
+	}
+	resortAccessibility,err := m.accessibilityResortRepo.GetByResortId(ctx,list[0].Id)
+	for _,element := range resortAccessibility{
+		ra := models.ResortAmenitiesAccessibility{
+			Id:   element.AccessibilityId,
+			Name: element.Name,
+		}
+		result.ResortAccessibility = append(result.ResortAccessibility,ra)
+	}
+	resortAmenities,err := m.amenitiesResortRepo.GetByResortId(ctx,list[0].Id)
+	for _,element := range resortAmenities{
+		ra := models.ResortAmenitiesAccessibility{
+			Id:   element.AmenitiesId,
+			Name: element.Name,
+		}
+		result.ResortAmenities = append(result.ResortAmenities,ra)
 	}
 	for _,element := range list{
 		rm := models.ResortRoomObj{

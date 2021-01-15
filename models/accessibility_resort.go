@@ -12,7 +12,7 @@ type AccessibilityResort struct {
 	DeletedDate  *time.Time `json:"deleted_date"`
 	IsDeleted    int        `json:"is_deleted" validate:"required"`
 	IsActive     int        `json:"is_active" validate:"required"`
-	ResortRoomId string `json:"resort_room_id"`
+	ResortId string `json:"resort_id"`
 	AccessibilityId int `json:"accessibility_id"`
 }
 

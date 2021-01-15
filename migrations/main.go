@@ -179,11 +179,11 @@ func main() {
 		db.Create(&migration)
 	}
 
-	accessibilityResortRoom := model.AccessibilityResortRoom{}
-	erraccessibilityResortRoom := db.AutoMigrate(&accessibilityResortRoom).AddForeignKey("resort_room_id", "resort_rooms(id)", "RESTRICT", "RESTRICT")
+	accessibilityResortRoom := model.AccessibilityResort{}
+	erraccessibilityResortRoom := db.AutoMigrate(&accessibilityResortRoom).AddForeignKey("resort_id", "resorts(id)", "RESTRICT", "RESTRICT")
 	if erraccessibilityResortRoom != nil {
 		migration := model.MigrationHistory{
-			DescMigration: "Add Table AccessibilityResortRoom",
+			DescMigration: "Add Table AccessibilityResort",
 			Date:          time.Now(),
 		}
 
@@ -222,11 +222,11 @@ func main() {
 		db.Create(&migration)
 	}
 
-	amenitiesResortRoom := model.AmenitiesResortRoom{}
-	erramenitiesResortRoom := db.AutoMigrate(&amenitiesResortRoom).AddForeignKey("resort_room_id", "resort_rooms(id)", "RESTRICT", "RESTRICT")
+	amenitiesResortRoom := model.AmenitiesResort{}
+	erramenitiesResortRoom := db.AutoMigrate(&amenitiesResortRoom).AddForeignKey("resort_id", "resorts(id)", "RESTRICT", "RESTRICT")
 	if erramenitiesResortRoom != nil {
 		migration := model.MigrationHistory{
-			DescMigration: "Add Table AmenitiesResortRoom",
+			DescMigration: "Add Table AmenitiesResort",
 			Date:          time.Now(),
 		}
 

@@ -89,6 +89,9 @@ import (
 	_accessibilityHttpDeliver "github.com/master/accessibility/delivery/http"
 	_accessibilityRepo "github.com/master/accessibility/repository"
 	_accessibilityUcase "github.com/master/accessibility/usecase"
+
+	_accessibilityResortRepo "github.com/services/accessibility_resort/repository"
+	_amenitiesResortRepo "github.com/services/amenities_resort/repository"
 )
 
 func main() {
@@ -181,7 +184,9 @@ func main() {
 	resortRoomPhotoRepo := _resortRoomPhotoRepo.NewresortRoomPhotoRepository(dbConn)
 	resortRoomPaymentRepo := _resortRoomPaymentRepo.NewresortRoomPaymentRepository(dbConn)
 	resortRoomRepo := _resortRoomRepo.NewresortRepository(dbConn)
-	_accessibilityRepo := _accessibilityRepo.NewAccessibilityRepository(dbConn)
+	accessibilityRepo := _accessibilityRepo.NewAccessibilityRepository(dbConn)
+	accessibilityResortRepo := _accessibilityResortRepo.NewaccessibilityResortRepository(dbConn)
+	amenitiesResortRepo := _amenitiesResortRepo.NewamenitiesResortRepository(dbConn)
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
@@ -195,13 +200,13 @@ func main() {
 	roleUsecase := _roleUcase.NewroleUsecase(adminUsecase, roleRepo, timeoutContext)
 	articlecategoryUsecase := _articlecategoryUcase.NewArticleCategoryUsecase(adminUsecase, articlecategoryRepo, timeoutContext)
 	articleblogUsecase := _articleblogUcase.NewArticleBlogUsecase(adminUsecase, articleblogRepo, timeoutContext)
-	resortUsecase := _resortUcase.NewresortUsecase(resortRoomPhotoRepo,resortRoomPaymentRepo,resortRoomRepo,resortPhotoRepo, resortRepo, timeoutContext)
+	resortUsecase := _resortUcase.NewresortUsecase(accessibilityResortRepo,amenitiesResortRepo,resortRoomPhotoRepo,resortRoomPaymentRepo,resortRoomRepo,resortPhotoRepo, resortRepo, timeoutContext)
 	provinceUsecase := _provinceUcase.NewprovinceUsecase(adminUsecase, provinceRepo, timeoutContext)
 	cityUsecase := _cityUcase.NewcityUsecase(adminUsecase, cityRepo, timeoutContext)
 	bankUsecase := _bankUcase.NewbankUsecase(adminUsecase, bankRepo, timeoutContext)
 	districtsUsecase := _districtsUcase.NewdistrictsUsecase(adminUsecase, districtsRepo, timeoutContext)
 	amenitiesUsecase := _amenitiesUcase.NewAmenitiesUsecase(adminUsecase, amenitiesRepo, timeoutContext)
-	accessibilityUsecase := _accessibilityUcase.NewaccessibilityUsecase(adminUsecase, _accessibilityRepo, timeoutContext)
+	accessibilityUsecase := _accessibilityUcase.NewaccessibilityUsecase(adminUsecase, accessibilityRepo, timeoutContext)
 
 	_resortHttpDeliver.NewresortHandler(e, resortUsecase)
 	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)

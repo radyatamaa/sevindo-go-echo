@@ -114,8 +114,11 @@ type ResortJoinDetailDto struct {
 	ProvinceId 			string `json:"province_id"`
 	ProvinceName 		string `json:"province_name"`
 	BranchName 			string `json:"branch_name"`
+	ResortAccessibility []ResortAmenitiesAccessibility `json:"resort_accessibility"`
+	ResortAmenities []ResortAmenitiesAccessibility `json:"resort_amenities"`
 	ResortRoom 			[]ResortRoomObj `json:"resort_room"`
 	ResortPhoto 		[]ResortRoomPhotoObj `json:"resort_photo"`
+	ReviewAmount int `json:"review_amount"`
 }
 type ResortRoomObj struct {
 	Id                   string     `json:"id" validate:"required"`
@@ -127,6 +130,10 @@ type ResortRoomObj struct {
 	ResortRoomPhoto  []ResortRoomPhotoObj `json:"resort_room_photo"`
 }
 
+type ResortAmenitiesAccessibility struct {
+	Id 			int `json:"id"`
+	Name 		string `json:"name"`
+} 
 type ResortRoomPaymentObj struct {
 	Id                   string     `json:"id" validate:"required"`
 	Currency 			 string `json:"currency"`
