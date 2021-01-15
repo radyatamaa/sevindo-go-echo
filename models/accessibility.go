@@ -12,5 +12,20 @@ type Accessibility struct {
 	DeletedDate  *time.Time `json:"deleted_date"`
 	IsDeleted    int        `json:"is_deleted" validate:"required"`
 	IsActive     int        `json:"is_active" validate:"required"`
-	Name  string `json:"name"`
+	Name  		 string `json:"name"`
+}
+
+type NewCommandAccessibility struct {
+	Id          int `json:"id" validate:"required"`
+	Name 		string `json:"name"`
+}
+
+type AccessibilityDto struct {
+	Id          int `json:"id" validate:"required"`
+	Name 		string `json:"name"`
+}
+
+type AccessibilityWithPagination struct {
+	Data []*AccessibilityDto  `json:"data"`
+	Meta *MetaPagination `json:"meta"`
 }
