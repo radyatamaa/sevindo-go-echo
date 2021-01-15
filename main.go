@@ -74,6 +74,10 @@ import (
 	_articleblogHttpDeliver "github.com/master/article_blog/delivery/http"
 	_articleblogRepo "github.com/master/article_blog/repository"
 	_articleblogUcase "github.com/master/article_blog/usecase"
+
+	_districtsHttpDeliver "github.com/master/districts/delivery/http"
+	_districtsRepo "github.com/master/districts/repository"
+	_districtsUcase "github.com/master/districts/usecase"
 )
 
 func main() {
@@ -161,6 +165,7 @@ func main() {
 	resortPhotoRepo := _resortPhotoRepo.NewresortPhotoRepository(dbConn)
 	roleRepo := _roleRepo.NewRoleRepository(dbConn)
 	bankRepo := _bankRepo.NewBankRepository(dbConn)
+	districtsRepo := _districtsRepo.NewDistrictsRepository(dbConn)
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
@@ -178,6 +183,7 @@ func main() {
 	provinceUsecase := _provinceUcase.NewprovinceUsecase(adminUsecase, provinceRepo, timeoutContext)
 	cityUsecase := _cityUcase.NewcityUsecase(adminUsecase, cityRepo, timeoutContext)
 	bankUsecase := _bankUcase.NewbankUsecase(adminUsecase, bankRepo, timeoutContext)
+	districtsUsecase := _districtsUcase.NewdistrictsUsecase(adminUsecase, districtsRepo, timeoutContext)
 
 	_resortHttpDeliver.NewresortHandler(e, resortUsecase)
 	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)
@@ -195,5 +201,6 @@ func main() {
 	_articleHttpDeliver.NewArticleHandler(e, au)
 	_roleHttpDeliver.NewroleHandler(e, roleUsecase)
 	_bankHttpDeliver.NewbankHandler(e, bankUsecase)
+	_districtsHttpDeliver.NewdistrictsHandler(e, districtsUsecase)
 	log.Fatal(e.Start(":9090"))
 }
