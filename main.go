@@ -62,6 +62,9 @@ import (
 	_cityUcase "github.com/master/city/usecase"
 
 	_resortPhotoRepo "github.com/services/resort_photo/repository"
+	_resortRoomRepo "github.com/services/resort_room/repository"
+	_resortRoomPaymentRepo "github.com/services/resort_room_payment/repository"
+	_resortRoomPhotoRepo "github.com/services/resort_room_photo/repository"
 
 	_roleHttpDeliver "github.com/master/role/delivery/http"
 	_roleRepo "github.com/master/role/repository"
@@ -171,6 +174,10 @@ func main() {
 	bankRepo := _bankRepo.NewBankRepository(dbConn)
 	districtsRepo := _districtsRepo.NewDistrictsRepository(dbConn)
 	amenitiesRepo := _amenitiesRepo.NewAmenitiesRepository(dbConn)
+	resortRoomPhotoRepo := _resortRoomPhotoRepo.NewresortRoomPhotoRepository(dbConn)
+	resortRoomPaymentRepo := _resortRoomPaymentRepo.NewresortRoomPaymentRepository(dbConn)
+	resortRoomRepo := _resortRoomRepo.NewresortRepository(dbConn)
+
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
@@ -184,7 +191,7 @@ func main() {
 	roleUsecase := _roleUcase.NewroleUsecase(adminUsecase, roleRepo, timeoutContext)
 	articlecategoryUsecase := _articlecategoryUcase.NewArticleCategoryUsecase(adminUsecase, articlecategoryRepo, timeoutContext)
 	articleblogUsecase := _articleblogUcase.NewArticleBlogUsecase(adminUsecase, articleblogRepo, timeoutContext)
-	resortUsecase := _resortUcase.NewresortUsecase(resortPhotoRepo, resortRepo, timeoutContext)
+	resortUsecase := _resortUcase.NewresortUsecase(resortRoomPhotoRepo,resortRoomPaymentRepo,resortRoomRepo,resortPhotoRepo, resortRepo, timeoutContext)
 	provinceUsecase := _provinceUcase.NewprovinceUsecase(adminUsecase, provinceRepo, timeoutContext)
 	cityUsecase := _cityUcase.NewcityUsecase(adminUsecase, cityRepo, timeoutContext)
 	bankUsecase := _bankUcase.NewbankUsecase(adminUsecase, bankRepo, timeoutContext)

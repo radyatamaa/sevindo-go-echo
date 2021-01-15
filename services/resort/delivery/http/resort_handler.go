@@ -29,6 +29,7 @@ func NewresortHandler(e *echo.Echo, us resort.Usecase) {
 		resortUsecase: us,
 	}
 	e.GET("/service/resort-search", handler.GetAll)
+	e.GET("/service/resort/:id", handler.GetDetail)
 }
 
 func isRequestValid(m *models.NewCommandProvince) (bool, error) {
@@ -68,6 +69,21 @@ func (a *resortHandler) GetAll(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
+func (a *resortHandler) GetDetail(c echo.Context) error {
+
+	id := c.Param("id")
+
+	ctx := c.Request().Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	result, err := a.resortUsecase.GetDetail(ctx, id)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, result)
+}
 
 func getStatusCode(err error) int {
 	if err == nil {
