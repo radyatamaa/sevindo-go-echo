@@ -15,3 +15,18 @@ type Districts struct {
 	DistrictsName  string `json:"districts_name"`
 	CityId *int `json:"city_id"`
 }
+type NewCommandDistricts struct {
+	Id          int `json:"id" validate:"required"`
+	DistrictsName  string `json:"districts_name"`
+	CityId *int `json:"city_id"`
+}
+
+type DistrictsDto struct {
+	Id          int `json:"id" validate:"required"`
+	DistrictsName  string `json:"districts_name"`
+	CityId *int `json:"city_id"`
+}
+type DistrictsWithPagination struct {
+	Data []*DistrictsDto  `json:"data"`
+	Meta *MetaPagination `json:"meta"`
+}
