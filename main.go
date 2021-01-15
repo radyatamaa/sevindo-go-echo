@@ -82,6 +82,10 @@ import (
 	_amenitiesHttpDeliver "github.com/master/amenities/delivery/http"
 	_amenitiesRepo "github.com/master/amenities/repository"
 	_amenitiesUcase "github.com/master/amenities/usecase"
+
+	_accessibilityHttpDeliver "github.com/master/accessibility/delivery/http"
+	_accessibilityRepo "github.com/master/accessibility/repository"
+	_accessibilityUcase "github.com/master/accessibility/usecase"
 )
 
 func main() {
@@ -171,6 +175,7 @@ func main() {
 	bankRepo := _bankRepo.NewBankRepository(dbConn)
 	districtsRepo := _districtsRepo.NewDistrictsRepository(dbConn)
 	amenitiesRepo := _amenitiesRepo.NewAmenitiesRepository(dbConn)
+	_accessibilityRepo := _accessibilityRepo.NewAccessibilityRepository(dbConn)
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
@@ -190,6 +195,7 @@ func main() {
 	bankUsecase := _bankUcase.NewbankUsecase(adminUsecase, bankRepo, timeoutContext)
 	districtsUsecase := _districtsUcase.NewdistrictsUsecase(adminUsecase, districtsRepo, timeoutContext)
 	amenitiesUsecase := _amenitiesUcase.NewAmenitiesUsecase(adminUsecase, amenitiesRepo, timeoutContext)
+	accessibilityUsecase := _accessibilityUcase.NewaccessibilityUsecase(adminUsecase, _accessibilityRepo, timeoutContext)
 
 	_resortHttpDeliver.NewresortHandler(e, resortUsecase)
 	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)
@@ -209,5 +215,6 @@ func main() {
 	_bankHttpDeliver.NewbankHandler(e, bankUsecase)
 	_districtsHttpDeliver.NewdistrictsHandler(e, districtsUsecase)
 	_amenitiesHttpDeliver.NewAmenitiesHandler(e, amenitiesUsecase)
+	_accessibilityHttpDeliver.NewaccessibilityHandler(e, accessibilityUsecase)
 	log.Fatal(e.Start(":9090"))
 }
