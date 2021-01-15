@@ -4,9 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/master/article_blog"
 	"strconv"
-
-	"github.com/master/article_category"
 
 	"time"
 
@@ -19,15 +18,15 @@ const (
 	timeFormat = "2006-01-02T15:04:05.999Z07:00" // reduce precision from RFC3339Nano as date format
 )
 
-type articleCategoryRepository struct {
+type articleblogRepository struct {
 	Conn *sql.DB
 }
 
 // NewuserRepository will create an object that represent the article.repository interface
-func NewArticleCategoryRepository(Conn *sql.DB) article_category.Repository {
-	return &articleCategoryRepository{Conn}
+func NewArticleBlogRepository(Conn *sql.DB) article_blog.Repository {
+	return &articleblogRepository{Conn}
 }
-func (m *articleCategoryRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.ArticleCategory, error) {
+func (m *articleblogRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.ArticleBlog, error) {
 	rows, err := m.Conn.QueryContext(ctx, query, args...)
 	if err != nil {
 		logrus.Error(err)
@@ -41,9 +40,9 @@ func (m *articleCategoryRepository) fetch(ctx context.Context, query string, arg
 		}
 	}()
 
-	result := make([]*models.ArticleCategory, 0)
+	result := make([]*models.ArticleBlog, 0)
 	for rows.Next() {
-		t := new(models.ArticleCategory)
+		t := new(models.ArticleBlog)
 		err = rows.Scan(
 			&t.Id,
 			&t.CreatedBy,
@@ -54,7 +53,10 @@ func (m *articleCategoryRepository) fetch(ctx context.Context, query string, arg
 			&t.DeletedDate,
 			&t.IsDeleted,
 			&t.IsActive,
-			&t.ArticleCategoryName,
+			&t.ArticleBlogName,
+			&t.Title,
+			&t.Description,
+			&t.CategoryId,
 		)
 
 		if err != nil {
@@ -66,8 +68,8 @@ func (m *articleCategoryRepository) fetch(ctx context.Context, query string, arg
 
 	return result, nil
 }
-func (m *articleCategoryRepository) GetByID(ctx context.Context, id int) (res *models.ArticleCategory, err error) {
-	query := `SELECT * FROM article_categories WHERE `
+func (m *articleblogRepository) GetByID(ctx context.Context, id int) (res *models.ArticleBlog, err error) {
+	query := `SELECT * FROM article_blogs WHERE `
 
 	if id != 0 {
 		query = query + ` id = '` + strconv.Itoa(id) + `' `
@@ -87,15 +89,15 @@ func (m *articleCategoryRepository) GetByID(ctx context.Context, id int) (res *m
 	return
 }
 
-func (m *articleCategoryRepository) Update(ctx context.Context, ar *models.ArticleCategory) error {
-	query := `UPDATE article_categories set modified_by=?, modified_date=? , country_name=?  WHERE id = ?`
+func (m *articleblogRepository) Update(ctx context.Context, ar *models.ArticleBlog) error {
+	query := `UPDATE article_blogs set modified_by=?, modified_date=? , country_name=?  WHERE id = ?`
 
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return nil
 	}
 
-	res, err := stmt.ExecContext(ctx, ar.ModifiedBy, time.Now(), ar.ArticleCategoryName, ar.Id)
+	res, err := stmt.ExecContext(ctx, ar.ModifiedBy, time.Now(), ar.ArticleBlogName, ar.Id, ar.Title, ar.Description, ar.CategoryId)
 	if err != nil {
 		return err
 	}
@@ -110,11 +112,10 @@ func (m *articleCategoryRepository) Update(ctx context.Context, ar *models.Artic
 	}
 
 	return nil
-
 }
 
-func (m *articleCategoryRepository) Delete(ctx context.Context, id int, deleted_by string) error {
-	query := `UPDATE article_categories SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE id =?`
+func (m *articleblogRepository) Delete(ctx context.Context, id int, deleted_by string) error {
+	query := `UPDATE article_blogs SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE id =?`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -132,17 +133,16 @@ func (m *articleCategoryRepository) Delete(ctx context.Context, id int, deleted_
 
 	//a.Id = lastID
 	return nil
-
 }
 
-func (m *articleCategoryRepository) Insert(ctx context.Context, a *models.ArticleCategory) error {
-	query := `INSERT article_categories SET id=? , created_by=? , created_date=? , modified_by=?, modified_date=? , deleted_by=? , deleted_date=? , is_deleted=? , is_active=? ,
-	article_category_name=?`
+func (m *articleblogRepository) Insert(ctx context.Context, a *models.ArticleBlog) error {
+	query := `INSERT article_blogs SET id=? , created_by=? , created_date=? , modified_by=?, modified_date=? , deleted_by=? , deleted_date=? , is_deleted=? , is_active=? ,
+	article_blog_name=?, title=?, description=?, category_id=?`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err
 	}
-	_, err = stmt.ExecContext(ctx, a.Id, a.CreatedBy, time.Now(), nil, nil, nil, nil, 0, 1, a.ArticleCategoryName)
+	_, err = stmt.ExecContext(ctx, a.Id, a.CreatedBy, time.Now(), nil, nil, nil, nil, 0, 1, a.ArticleBlogName, a.Title,a.Description, a.CategoryId)
 	if err != nil {
 		return err
 	}
@@ -156,8 +156,8 @@ func (m *articleCategoryRepository) Insert(ctx context.Context, a *models.Articl
 	return nil
 }
 
-func (m *articleCategoryRepository) Count(ctx context.Context) (int, error) {
-	query := `SELECT count(*) AS count FROM article_categories WHERE is_deleted = 0 and is_active = 1`
+func (m *articleblogRepository) Count(ctx context.Context) (int, error) {
+	query := `SELECT count(*) AS count FROM article_blogs WHERE is_deleted = 0 and is_active = 1`
 
 	rows, err := m.Conn.QueryContext(ctx, query)
 	if err != nil {
@@ -184,9 +184,9 @@ func checkCount(rows *sql.Rows) (count int, err error) {
 	return count, nil
 }
 
-func (m *articleCategoryRepository) List(ctx context.Context, limit, offset int) ([]*models.ArticleCategory, error) {
+func (m *articleblogRepository) List(ctx context.Context, limit, offset int) ([]*models.ArticleBlog, error) {
 
-	query := `SELECT * FROM article_categories WHERE is_deleted = 0 and is_active = 1 `
+	query := `SELECT * FROM article_blogs WHERE is_deleted = 0 and is_active = 1 `
 
 	query = query + ` LIMIT ? OFFSET ?`
 	list, err := m.fetch(ctx, query, limit, offset)

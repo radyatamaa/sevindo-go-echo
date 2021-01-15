@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -65,11 +67,11 @@ func (m *provinceRepository) fetch(ctx context.Context, query string, args ...in
 
 	return result, nil
 }
-func (m *provinceRepository) GetByID(ctx context.Context, id string) (res *models.Province, err error) {
+func (m *provinceRepository) GetByID(ctx context.Context, id int) (res *models.Province, err error) {
 	query := `SELECT * FROM provinces WHERE `
 
-	if id != "" {
-		query = query + ` id = '` + id + `' `
+	if id != 0 {
+		query = query + ` id = '` + strconv.Itoa(id) + `' `
 	}
 
 	list, err := m.fetch(ctx, query)
@@ -86,12 +88,50 @@ func (m *provinceRepository) GetByID(ctx context.Context, id string) (res *model
 	return
 }
 
-func (m *provinceRepository) Update(ctx context.Context, ar *models.Province) error {
-	panic("implement me")
+func (m *provinceRepository) Update(ctx context.Context, a *models.Province) error {
+	query := `UPDATE provinces set modified_by=?, modified_date=? , province_name=?, country_id=?  WHERE id = ?`
+
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return nil
+	}
+
+	res, err := stmt.ExecContext(ctx, a.ModifiedBy, time.Now(), a.ProvinceName, a.CountryId,a.Id)
+	if err != nil {
+		return err
+	}
+	affect, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affect != 1 {
+		err = fmt.Errorf("Weird  Behaviour. Total Affected: %d", affect)
+
+		return err
+	}
+
+	return nil
 }
 
-func (m *provinceRepository) Delete(ctx context.Context, id string, deleted_by string) error {
-	panic("implement me")
+func (m *provinceRepository) Delete(ctx context.Context, id int, deleted_by string) error {
+	query := `UPDATE provinces SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE id =?`
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.ExecContext(ctx, deleted_by, time.Now(), 1, 0, id)
+	if err != nil {
+		return err
+	}
+
+	//lastID, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	//a.Id = lastID
+	return nil
 }
 
 

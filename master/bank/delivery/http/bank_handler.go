@@ -2,11 +2,10 @@ package http
 
 import (
 	"context"
-
 	"net/http"
 	"strconv"
 
-	"github.com/master/article_blog"
+	"github.com/master/bank"
 
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
@@ -20,26 +19,26 @@ type ResponseError struct {
 	Message string `json:"message"`
 }
 
-// ArticleCategoryHandler  represent the http handler for language
-type ArticleBlogHandler struct {
-	ArticleBlogUsecase article_blog.Usecase
+// currencyHandler  represent the http handler for currency
+type bankHandler struct {
+	bankUsecase bank.Usecase
 }
 
-// NewArticleCategoryHandler will initialize the languages/ resources endpoint
-func NewArticleBlogHandler(e *echo.Echo, us article_blog.Usecase) {
-	handler := &ArticleBlogHandler{
-		ArticleBlogUsecase: us,
+// NewbankHandler will initialize the currencys/ resources endpoint
+func NewbankHandler(e *echo.Echo, us bank.Usecase) {
+	handler := &bankHandler{
+		bankUsecase: us,
 	}
-	e.POST("/master/article_blog", handler.Create)
-	e.PUT("/master/article_blog/:id", handler.UpdateArticleBlog)
-	e.DELETE("/master/article_blog/:id", handler.Delete)
-	// e.GET("/languages/:id/credit", handler.GetCreditByID)
-	e.GET("/master/article_blog/:id", handler.GetDetailID)
-	e.GET("/master/article_blog", handler.List)
+	e.POST("/master/bank", handler.Create)
+	e.PUT("/master/bank/:id", handler.UpdateBank)
+	e.DELETE("/master/bank/:id", handler.Delete)
+	// e.GET("/currencys/:id/credit", handler.GetCreditByID)
+	e.GET("/master/bank/:id", handler.GetDetailID)
+	e.GET("/master/bank", handler.List)
 	//e.POST("/subscribe", handler.Subscribe)
 }
 
-func isRequestValid(m *models.NewCommandArticleCategory) (bool, error) {
+func isRequestValid(m *models.NewCommandBank) (bool, error) {
 	validate := validator.New()
 	err := validate.Struct(m)
 	if err != nil {
@@ -48,20 +47,12 @@ func isRequestValid(m *models.NewCommandArticleCategory) (bool, error) {
 	return true, nil
 }
 
-func (a *ArticleBlogHandler) UpdateArticleBlog(c echo.Context) error {
+func (a *bankHandler) Create(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
-
-	if token == "" {
-		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
-	}
-
-	id := c.Param("id")
-	var articleblog models.NewCommandArticleBlog
-	ids ,_:= strconv.Atoi(id)
-	articleblog.Id = ids
-	err := c.Bind(&articleblog)
+	var bank models.NewCommandBank
+	err := c.Bind(&bank)
 	if err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, err.Error())
 	}
@@ -71,14 +62,44 @@ func (a *ArticleBlogHandler) UpdateArticleBlog(c echo.Context) error {
 		ctx = context.Background()
 	}
 
-	err = a.ArticleBlogUsecase.Update(ctx, &articleblog, token)
+	res, err := a.bankUsecase.Create(ctx, &bank, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
-	return c.JSON(http.StatusOK, articleblog)
+	return c.JSON(http.StatusOK, res)
 }
 
-func (a *ArticleBlogHandler) List(c echo.Context) error {
+func (a *bankHandler) UpdateBank(c echo.Context) error {
+	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
+	id := c.Param("id")
+	var bank models.NewCommandBank
+	ids ,_:= strconv.Atoi(id)
+	bank.Id = ids
+	err := c.Bind(&bank)
+	if err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+	}
+
+	ctx := c.Request().Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	err = a.bankUsecase.Update(ctx, &bank, token)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, bank)
+}
+
+func (a *bankHandler) List(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
@@ -104,14 +125,14 @@ func (a *ArticleBlogHandler) List(c echo.Context) error {
 		ctx = context.Background()
 	}
 
-	result, err := a.ArticleBlogUsecase.List(ctx, page, limit, offset,search)
+	result, err := a.bankUsecase.List(ctx, page, limit, offset,search)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 	return c.JSON(http.StatusOK, result)
 }
 
-func (a *ArticleBlogHandler) Delete(c echo.Context) error {
+func (a *bankHandler) Delete(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
@@ -126,36 +147,15 @@ func (a *ArticleBlogHandler) Delete(c echo.Context) error {
 		ctx = context.Background()
 	}
 	ids ,_:= strconv.Atoi(id)
-	result, err := a.ArticleBlogUsecase.Delete(ctx, ids, token)
+	result, err := a.bankUsecase.Delete(ctx, ids, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 	return c.JSON(http.StatusOK, result)
 }
 
-func (a *ArticleBlogHandler) Create(c echo.Context) error {
-	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	token := c.Request().Header.Get("Authorization")
-	var articleblog models.NewCommandArticleBlog
-	err := c.Bind(&articleblog)
-	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
-	}
 
-	ctx := c.Request().Context()
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
-	res, err := a.ArticleBlogUsecase.Create(ctx, &articleblog, token)
-	if err != nil {
-		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
-	}
-	return c.JSON(http.StatusOK, res)
-}
-
-func (a *ArticleBlogHandler) GetDetailID(c echo.Context) error {
+func (a *bankHandler) GetDetailID(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
@@ -166,8 +166,9 @@ func (a *ArticleBlogHandler) GetDetailID(c echo.Context) error {
 	if ctx == nil {
 		ctx = context.Background()
 	}
+
 	ids ,_:= strconv.Atoi(id)
-	result, err := a.ArticleBlogUsecase.GetById(ctx, ids, token)
+	result, err := a.bankUsecase.GetById(ctx, ids, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}

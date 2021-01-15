@@ -26,3 +26,8 @@ type ArticleCategoryDto struct {
 	Id                  int    `json:"id" validate:"required"`
 	ArticleCategoryName string `json:"article_category_name"`
 }
+
+type ArticleCategoryWithPagination struct {
+	Data []*ArticleCategoryDto  `json:"data"`
+	Meta *MetaPagination `json:"meta"`
+}

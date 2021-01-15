@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type Currency struct {
+type Bank struct {
 	Id           int        `json:"id" validate:"required"`
 	CreatedBy    string     `json:"created_by" validate:"required"`
 	CreatedDate  time.Time  `json:"created_date" validate:"required"`
@@ -14,21 +14,21 @@ type Currency struct {
 	DeletedDate  *time.Time `json:"deleted_date"`
 	IsDeleted    int        `json:"is_deleted" validate:"required"`
 	IsActive     int        `json:"is_active" validate:"required"`
-	CurrencyName string     `json:"currency_name"`
+	BankName string     `json:"bank_name"`
 }
 
-type NewCommandCurrency struct {
+type NewCommandBank struct {
 	Id           int    `json:"id" validate:"required"`
-	CurrencyName string `json:"currency_name"`
+	BankName string `json:"bank_name"`
 }
 
-type CurrencyDto struct {
+type BankDto struct {
 	Id           int    `json:"id" validate:"required"`
-	CurrencyName string `json:"currency_name"`
+	BankName string `json:"bank_name"`
 }
 
-type CurrencyWithPagination struct {
-	Data []*CurrencyDto  `json:"data"`
+type BankWithPagination struct {
+	Data []*BankDto  `json:"data"`
 	Meta *MetaPagination `json:"meta"`
 }
 

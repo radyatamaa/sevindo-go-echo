@@ -57,11 +57,27 @@ import (
 	_resortRepo "github.com/services/resort/repository"
 	_resortUcase "github.com/services/resort/usecase"
 
+	_cityHttpDeliver "github.com/master/city/delivery/http"
+	_cityRepo "github.com/master/city/repository"
+	_cityUcase "github.com/master/city/usecase"
+
 	_resortPhotoRepo "github.com/services/resort_photo/repository"
 
 	_roleHttpDeliver "github.com/master/role/delivery/http"
 	_roleRepo "github.com/master/role/repository"
 	_roleUcase "github.com/master/role/usecase"
+
+	_bankHttpDeliver "github.com/master/bank/delivery/http"
+	_bankRepo "github.com/master/bank/repository"
+	_bankUcase "github.com/master/bank/usecase"
+
+	_articleblogHttpDeliver "github.com/master/article_blog/delivery/http"
+	_articleblogRepo "github.com/master/article_blog/repository"
+	_articleblogUcase "github.com/master/article_blog/usecase"
+
+	_districtsHttpDeliver "github.com/master/districts/delivery/http"
+	_districtsRepo "github.com/master/districts/repository"
+	_districtsUcase "github.com/master/districts/usecase"
 )
 
 func main() {
@@ -143,24 +159,32 @@ func main() {
 	languageRepo := _languageRepo.NewLanguageRepository(dbConn)
 	provinceRepo := _provinceRepo.NewProvinceRepository(dbConn)
 	articlecategoryRepo := _articlecategoryRepo.NewArticleCategoryRepository(dbConn)
+	articleblogRepo := _articleblogRepo.NewArticleBlogRepository(dbConn)
+	cityRepo := _cityRepo.NewCityRepository(dbConn)
 	resortRepo := _resortRepo.NewresortRepository(dbConn)
 	resortPhotoRepo := _resortPhotoRepo.NewresortPhotoRepository(dbConn)
 	roleRepo := _roleRepo.NewRoleRepository(dbConn)
+	bankRepo := _bankRepo.NewBankRepository(dbConn)
+	districtsRepo := _districtsRepo.NewDistrictsRepository(dbConn)
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
 	isUsecase := _isUcase.NewidentityserverUsecase(urlForgotPassword, redirectUrlGoogle, clientIDGoogle, clientSecretGoogle, baseUrlis, basicAuth, accountStorage, accessKeyStorage)
 	adminUsecase := _userAdminUcase.NewuserAdminUsecase(tokenSystem, adminRepo, isUsecase, timeoutContext)
-	branchUsecase := _branchUcase.NewbranchUsecase(adminUsecase,branchRepo,timeoutContext)
+	branchUsecase := _branchUcase.NewbranchUsecase(adminUsecase, branchRepo, timeoutContext)
 	currencyUsecase := _currencyUcase.NewcurrencyUsecase(adminUsecase, currencyRepo, timeoutContext)
 	userUsecase := _userUcase.NewuserUsecase(userRepo, isUsecase, timeoutContext)
 	countryUsecase := _countryUcase.NewcountryUsecase(adminUsecase, countryRepo, timeoutContext)
 	languageUsecase := _languageUcase.NewlanguageUsecase(adminUsecase, languageRepo, timeoutContext)
-	provinceUsecase := _provinceUcase.NewprovinceUsecase(provinceRepo, timeoutContext)
-	articlecategoryUsecase := _articlecategoryUcase.NewArticleCategoryUsecase(articlecategoryRepo, timeoutContext)
 	roleUsecase := _roleUcase.NewroleUsecase(adminUsecase, roleRepo, timeoutContext)
-
+	articlecategoryUsecase := _articlecategoryUcase.NewArticleCategoryUsecase(adminUsecase, articlecategoryRepo, timeoutContext)
+	articleblogUsecase := _articleblogUcase.NewArticleBlogUsecase(adminUsecase, articleblogRepo, timeoutContext)
 	resortUsecase := _resortUcase.NewresortUsecase(resortPhotoRepo, resortRepo, timeoutContext)
+	provinceUsecase := _provinceUcase.NewprovinceUsecase(adminUsecase, provinceRepo, timeoutContext)
+	cityUsecase := _cityUcase.NewcityUsecase(adminUsecase, cityRepo, timeoutContext)
+	bankUsecase := _bankUcase.NewbankUsecase(adminUsecase, bankRepo, timeoutContext)
+	districtsUsecase := _districtsUcase.NewdistrictsUsecase(adminUsecase, districtsRepo, timeoutContext)
+
 	_resortHttpDeliver.NewresortHandler(e, resortUsecase)
 	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)
 	_currencyHttpDeliver.NewcurrencyHandler(e, currencyUsecase)
@@ -172,7 +196,11 @@ func main() {
 	_languageHttpDeliver.NewlanguageHandler(e, languageUsecase)
 	_provinceHttpDeliver.NewprovinceHandler(e, provinceUsecase)
 	_articlecategoryHttpDeliver.NewArticleCategoryHandler(e, articlecategoryUsecase)
+	_articleblogHttpDeliver.NewArticleBlogHandler(e, articleblogUsecase)
+	_cityHttpDeliver.NewcityHandler(e, cityUsecase)
 	_articleHttpDeliver.NewArticleHandler(e, au)
 	_roleHttpDeliver.NewroleHandler(e, roleUsecase)
+	_bankHttpDeliver.NewbankHandler(e, bankUsecase)
+	_districtsHttpDeliver.NewdistrictsHandler(e, districtsUsecase)
 	log.Fatal(e.Start(":9090"))
 }

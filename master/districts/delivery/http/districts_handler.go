@@ -2,11 +2,10 @@ package http
 
 import (
 	"context"
+	"github.com/master/districts"
 
 	"net/http"
 	"strconv"
-
-	"github.com/master/article_blog"
 
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
@@ -20,26 +19,25 @@ type ResponseError struct {
 	Message string `json:"message"`
 }
 
-// ArticleCategoryHandler  represent the http handler for language
-type ArticleBlogHandler struct {
-	ArticleBlogUsecase article_blog.Usecase
+// countryHandler  represent the http handler for country
+type districtsHandler struct {
+	districtsUsecase districts.Usecase
 }
 
-// NewArticleCategoryHandler will initialize the languages/ resources endpoint
-func NewArticleBlogHandler(e *echo.Echo, us article_blog.Usecase) {
-	handler := &ArticleBlogHandler{
-		ArticleBlogUsecase: us,
+// NewcityHandler will initialize the countrys/ resources endpoint
+func NewdistrictsHandler(e *echo.Echo, us districts.Usecase) {
+	handler := &districtsHandler{
+		districtsUsecase: us,
 	}
-	e.POST("/master/article_blog", handler.Create)
-	e.PUT("/master/article_blog/:id", handler.UpdateArticleBlog)
-	e.DELETE("/master/article_blog/:id", handler.Delete)
-	// e.GET("/languages/:id/credit", handler.GetCreditByID)
-	e.GET("/master/article_blog/:id", handler.GetDetailID)
-	e.GET("/master/article_blog", handler.List)
-	//e.POST("/subscribe", handler.Subscribe)
+	e.POST("/master/districts", handler.Create)
+	e.PUT("/master/districts/:id", handler.UpdateDistricts)
+	e.DELETE("/master/districts/:id", handler.Delete)
+	// e.GET("/countrys/:id/credit", handler.GetCreditByID)
+	e.GET("/master/districts/:id", handler.GetDetailID)
+	e.GET("/master/districts", handler.List)
 }
 
-func isRequestValid(m *models.NewCommandArticleCategory) (bool, error) {
+func isRequestValid(m *models.NewCommandDistricts) (bool, error) {
 	validate := validator.New()
 	err := validate.Struct(m)
 	if err != nil {
@@ -47,38 +45,7 @@ func isRequestValid(m *models.NewCommandArticleCategory) (bool, error) {
 	}
 	return true, nil
 }
-
-func (a *ArticleBlogHandler) UpdateArticleBlog(c echo.Context) error {
-	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	token := c.Request().Header.Get("Authorization")
-
-	if token == "" {
-		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
-	}
-
-	id := c.Param("id")
-	var articleblog models.NewCommandArticleBlog
-	ids ,_:= strconv.Atoi(id)
-	articleblog.Id = ids
-	err := c.Bind(&articleblog)
-	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
-	}
-
-	ctx := c.Request().Context()
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
-	err = a.ArticleBlogUsecase.Update(ctx, &articleblog, token)
-	if err != nil {
-		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
-	}
-	return c.JSON(http.StatusOK, articleblog)
-}
-
-func (a *ArticleBlogHandler) List(c echo.Context) error {
+func (a *districtsHandler) List(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
@@ -104,14 +71,93 @@ func (a *ArticleBlogHandler) List(c echo.Context) error {
 		ctx = context.Background()
 	}
 
-	result, err := a.ArticleBlogUsecase.List(ctx, page, limit, offset,search)
+	result, err := a.districtsUsecase.List(ctx, page, limit, offset,search)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 	return c.JSON(http.StatusOK, result)
 }
 
-func (a *ArticleBlogHandler) Delete(c echo.Context) error {
+
+func (a *districtsHandler) Create(c echo.Context) error {
+	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
+
+	var districts models.NewCommandDistricts
+	err := c.Bind(&districts)
+	if err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+	}
+
+	ctx := c.Request().Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	res,err := a.districtsUsecase.Create(ctx, &districts, token)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, res)
+}
+
+
+func (a *districtsHandler) GetDetailID(c echo.Context) error {
+	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	id := c.Param("id")
+
+	ctx := c.Request().Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	ids ,_:= strconv.Atoi(id)
+	result, err := a.districtsUsecase.GetById(ctx, ids, token)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, result)
+}
+func (a *districtsHandler) UpdateDistricts(c echo.Context) error {
+	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
+	id := c.Param("id")
+	var districts models.NewCommandDistricts
+	ids ,_:= strconv.Atoi(id)
+	districts.Id = ids
+	err := c.Bind(&districts)
+	if err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+	}
+
+	ctx := c.Request().Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	err = a.districtsUsecase.Update(ctx, &districts, token)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, districts)
+}
+
+func (a *districtsHandler) Delete (c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
@@ -126,54 +172,12 @@ func (a *ArticleBlogHandler) Delete(c echo.Context) error {
 		ctx = context.Background()
 	}
 	ids ,_:= strconv.Atoi(id)
-	result, err := a.ArticleBlogUsecase.Delete(ctx, ids, token)
+	result, err := a.districtsUsecase.Delete(ctx, ids, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 	return c.JSON(http.StatusOK, result)
 }
-
-func (a *ArticleBlogHandler) Create(c echo.Context) error {
-	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	token := c.Request().Header.Get("Authorization")
-	var articleblog models.NewCommandArticleBlog
-	err := c.Bind(&articleblog)
-	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
-	}
-
-	ctx := c.Request().Context()
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
-	res, err := a.ArticleBlogUsecase.Create(ctx, &articleblog, token)
-	if err != nil {
-		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
-	}
-	return c.JSON(http.StatusOK, res)
-}
-
-func (a *ArticleBlogHandler) GetDetailID(c echo.Context) error {
-	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	token := c.Request().Header.Get("Authorization")
-
-	id := c.Param("id")
-
-	ctx := c.Request().Context()
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	ids ,_:= strconv.Atoi(id)
-	result, err := a.ArticleBlogUsecase.GetById(ctx, ids, token)
-	if err != nil {
-		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
-	}
-	return c.JSON(http.StatusOK, result)
-}
-
 func getStatusCode(err error) int {
 	if err == nil {
 		return http.StatusOK
