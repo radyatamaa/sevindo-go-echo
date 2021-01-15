@@ -16,19 +16,27 @@ type ArticleBlog struct {
 	IsActive        int        `json:"is_active" validate:"required"`
 	ArticleBlogName string     `json:"article_blog_name"`
 	Title           string     `json:"title" validate:"required"`
-	Deskripsi       string     `json:"content" validate:"required"`
+	Description     string     `json:"description" validate:"required"`
+	CategoryId              *int        `json:"category_id"`
 }
 
 type NewCommandArticleBlog struct {
 	Id              int    `json:"id" validate:"required"`
 	ArticleBlogName string `json:"article_blog_name"`
 	Title           string `json:"title" validate:"required"`
-	Deskripsi       string `json:"content" validate:"required"`
+	Description       string `json:"description" validate:"required"`
+	CategoryId             *int        `json:"category_id" `
 }
 
 type ArticleBlogDto struct {
 	Id              int    `json:"id" validate:"required"`
 	ArticleBlogName string `json:"article_blog_name"`
 	Title           string `json:"title" validate:"required"`
-	Deskripsi       string `json:"content" validate:"required"`
+	Description       string `json:"description"`
+	CategoryId    *int `json:"category_id"`
+}
+
+type ArticleBlogWithPagination struct {
+	Data []*ArticleBlogDto  `json:"data"`
+	Meta *MetaPagination `json:"meta"`
 }

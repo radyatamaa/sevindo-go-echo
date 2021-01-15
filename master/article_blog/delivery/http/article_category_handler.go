@@ -2,9 +2,11 @@ package http
 
 import (
 	"context"
-	"net/http"
 
-	"github.com/master/article_category"
+	"net/http"
+	"strconv"
+
+	"github.com/master/article_blog"
 
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
@@ -19,21 +21,21 @@ type ResponseError struct {
 }
 
 // ArticleCategoryHandler  represent the http handler for language
-type ArticleCategoryHandler struct {
-	ArticleCategoryUsecase article_category.Usecase
+type ArticleBlogHandler struct {
+	ArticleBlogUsecase article_blog.Usecase
 }
 
 // NewArticleCategoryHandler will initialize the languages/ resources endpoint
-func NewArticleCategoryHandler(e *echo.Echo, us article_category.Usecase) {
-	handler := &ArticleCategoryHandler{
-		ArticleCategoryUsecase: us,
+func NewArticleBlogHandler(e *echo.Echo, us article_blog.Usecase) {
+	handler := &ArticleBlogHandler{
+		ArticleBlogUsecase: us,
 	}
-	e.POST("/master/article_category", handler.Create)
-	// e.PUT("/languages/:id", handler.Updatelanguage)
-	// e.DELETE("/languages/:id", handler.Delete)
+	e.POST("/master/article_blog", handler.Create)
+	e.PUT("/master/article_blog/:id", handler.UpdateArticleBlog)
+	e.DELETE("/master/article_blog/:id", handler.Delete)
 	// e.GET("/languages/:id/credit", handler.GetCreditByID)
-	e.GET("/master/article_category/:id", handler.GetDetailID)
-	// e.GET("/languages", handler.List)
+	e.GET("/master/article_blog/:id", handler.GetDetailID)
+	e.GET("/master/article_blog", handler.List)
 	//e.POST("/subscribe", handler.Subscribe)
 }
 
@@ -46,12 +48,20 @@ func isRequestValid(m *models.NewCommandArticleCategory) (bool, error) {
 	return true, nil
 }
 
-func (a *ArticleCategoryHandler) Create(c echo.Context) error {
+func (a *ArticleBlogHandler) UpdateArticleBlog(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
-	var articlecategory models.NewCommandArticleCategory
-	err := c.Bind(&articlecategory)
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
+	id := c.Param("id")
+	var articleblog models.NewCommandArticleBlog
+	ids ,_:= strconv.Atoi(id)
+	articleblog.Id = ids
+	err := c.Bind(&articleblog)
 	if err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, err.Error())
 	}
@@ -61,14 +71,91 @@ func (a *ArticleCategoryHandler) Create(c echo.Context) error {
 		ctx = context.Background()
 	}
 
-	res, err := a.ArticleCategoryUsecase.Create(ctx, &articlecategory, token)
+	err = a.ArticleBlogUsecase.Update(ctx, &articleblog, token)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, articleblog)
+}
+
+func (a *ArticleBlogHandler) List(c echo.Context) error {
+	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
+	qpage := c.QueryParam("page")
+	qperPage := c.QueryParam("size")
+	search := c.QueryParam("search")
+
+	var limit = 20
+	var page = 1
+	var offset = 0
+
+	page, _ = strconv.Atoi(qpage)
+	limit, _ = strconv.Atoi(qperPage)
+	offset = (page - 1) * limit
+
+	ctx := c.Request().Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	result, err := a.ArticleBlogUsecase.List(ctx, page, limit, offset,search)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
+func (a *ArticleBlogHandler) Delete(c echo.Context) error {
+	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
+	id := c.Param("id")
+	ctx := c.Request().Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	ids ,_:= strconv.Atoi(id)
+	result, err := a.ArticleBlogUsecase.Delete(ctx, ids, token)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
+func (a *ArticleBlogHandler) Create(c echo.Context) error {
+	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+	var articleblog models.NewCommandArticleBlog
+	err := c.Bind(&articleblog)
+	if err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+	}
+
+	ctx := c.Request().Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	res, err := a.ArticleBlogUsecase.Create(ctx, &articleblog, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 	return c.JSON(http.StatusOK, res)
 }
 
-func (a *ArticleCategoryHandler) GetDetailID(c echo.Context) error {
+func (a *ArticleBlogHandler) GetDetailID(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
@@ -79,8 +166,8 @@ func (a *ArticleCategoryHandler) GetDetailID(c echo.Context) error {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-
-	result, err := a.ArticleCategoryUsecase.GetById(ctx, id, token)
+	ids ,_:= strconv.Atoi(id)
+	result, err := a.ArticleBlogUsecase.GetById(ctx, ids, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
