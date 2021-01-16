@@ -62,6 +62,9 @@ import (
 	_cityUcase "github.com/master/city/usecase"
 
 	_resortPhotoRepo "github.com/services/resort_photo/repository"
+	_resortRoomRepo "github.com/services/resort_room/repository"
+	_resortRoomPaymentRepo "github.com/services/resort_room_payment/repository"
+	_resortRoomPhotoRepo "github.com/services/resort_room_photo/repository"
 
 	_roleHttpDeliver "github.com/master/role/delivery/http"
 	_roleRepo "github.com/master/role/repository"
@@ -78,6 +81,17 @@ import (
 	_districtsHttpDeliver "github.com/master/districts/delivery/http"
 	_districtsRepo "github.com/master/districts/repository"
 	_districtsUcase "github.com/master/districts/usecase"
+
+	_amenitiesHttpDeliver "github.com/master/amenities/delivery/http"
+	_amenitiesRepo "github.com/master/amenities/repository"
+	_amenitiesUcase "github.com/master/amenities/usecase"
+
+	_accessibilityHttpDeliver "github.com/master/accessibility/delivery/http"
+	_accessibilityRepo "github.com/master/accessibility/repository"
+	_accessibilityUcase "github.com/master/accessibility/usecase"
+
+	_accessibilityResortRepo "github.com/services/accessibility_resort/repository"
+	_amenitiesResortRepo "github.com/services/amenities_resort/repository"
 )
 
 func main() {
@@ -166,6 +180,13 @@ func main() {
 	roleRepo := _roleRepo.NewRoleRepository(dbConn)
 	bankRepo := _bankRepo.NewBankRepository(dbConn)
 	districtsRepo := _districtsRepo.NewDistrictsRepository(dbConn)
+	amenitiesRepo := _amenitiesRepo.NewAmenitiesRepository(dbConn)
+	resortRoomPhotoRepo := _resortRoomPhotoRepo.NewresortRoomPhotoRepository(dbConn)
+	resortRoomPaymentRepo := _resortRoomPaymentRepo.NewresortRoomPaymentRepository(dbConn)
+	resortRoomRepo := _resortRoomRepo.NewresortRepository(dbConn)
+	accessibilityRepo := _accessibilityRepo.NewAccessibilityRepository(dbConn)
+	accessibilityResortRepo := _accessibilityResortRepo.NewaccessibilityResortRepository(dbConn)
+	amenitiesResortRepo := _amenitiesResortRepo.NewamenitiesResortRepository(dbConn)
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
@@ -179,11 +200,13 @@ func main() {
 	roleUsecase := _roleUcase.NewroleUsecase(adminUsecase, roleRepo, timeoutContext)
 	articlecategoryUsecase := _articlecategoryUcase.NewArticleCategoryUsecase(adminUsecase, articlecategoryRepo, timeoutContext)
 	articleblogUsecase := _articleblogUcase.NewArticleBlogUsecase(adminUsecase, articleblogRepo, timeoutContext)
-	resortUsecase := _resortUcase.NewresortUsecase(resortPhotoRepo, resortRepo, timeoutContext)
+	resortUsecase := _resortUcase.NewresortUsecase(accessibilityResortRepo,amenitiesResortRepo,resortRoomPhotoRepo,resortRoomPaymentRepo,resortRoomRepo,resortPhotoRepo, resortRepo, timeoutContext)
 	provinceUsecase := _provinceUcase.NewprovinceUsecase(adminUsecase, provinceRepo, timeoutContext)
 	cityUsecase := _cityUcase.NewcityUsecase(adminUsecase, cityRepo, timeoutContext)
 	bankUsecase := _bankUcase.NewbankUsecase(adminUsecase, bankRepo, timeoutContext)
 	districtsUsecase := _districtsUcase.NewdistrictsUsecase(adminUsecase, districtsRepo, timeoutContext)
+	amenitiesUsecase := _amenitiesUcase.NewAmenitiesUsecase(adminUsecase, amenitiesRepo, timeoutContext)
+	accessibilityUsecase := _accessibilityUcase.NewaccessibilityUsecase(adminUsecase, accessibilityRepo, timeoutContext)
 
 	_resortHttpDeliver.NewresortHandler(e, resortUsecase)
 	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)
@@ -202,5 +225,7 @@ func main() {
 	_roleHttpDeliver.NewroleHandler(e, roleUsecase)
 	_bankHttpDeliver.NewbankHandler(e, bankUsecase)
 	_districtsHttpDeliver.NewdistrictsHandler(e, districtsUsecase)
+	_amenitiesHttpDeliver.NewAmenitiesHandler(e, amenitiesUsecase)
+	_accessibilityHttpDeliver.NewaccessibilityHandler(e, accessibilityUsecase)
 	log.Fatal(e.Start(":9090"))
 }

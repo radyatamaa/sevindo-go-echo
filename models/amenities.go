@@ -14,3 +14,18 @@ type Amenities struct {
 	IsActive     int        `json:"is_active" validate:"required"`
 	Name  string `json:"name"`
 }
+
+type NewCommandAmenities struct {
+	Id                  int    `json:"id" validate:"required"`
+	Name string `json:"name"`
+}
+
+type AmenitiesDto struct {
+	Id                  int    `json:"id" validate:"required"`
+	Name string `json:"name"`
+}
+
+type AmenitiesWithPagination struct {
+	Data []*AmenitiesDto  `json:"data"`
+	Meta *MetaPagination `json:"meta"`
+}
