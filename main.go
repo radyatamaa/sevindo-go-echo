@@ -82,6 +82,11 @@ import (
 	_districtsRepo "github.com/master/districts/repository"
 	_districtsUcase "github.com/master/districts/usecase"
 
+	_promoHttpDeliver "github.com/master/promo/delivery/http"
+	_promoRepo "github.com/master/promo/repository"
+	_promoUcase "github.com/master/promo/usecase"
+
+
 	_amenitiesHttpDeliver "github.com/master/amenities/delivery/http"
 	_amenitiesRepo "github.com/master/amenities/repository"
 	_amenitiesUcase "github.com/master/amenities/usecase"
@@ -184,6 +189,7 @@ func main() {
 	roleRepo := _roleRepo.NewRoleRepository(dbConn)
 	bankRepo := _bankRepo.NewBankRepository(dbConn)
 	districtsRepo := _districtsRepo.NewDistrictsRepository(dbConn)
+	promoRepo := _promoRepo.NewPromoRepository(dbConn)
 	amenitiesRepo := _amenitiesRepo.NewAmenitiesRepository(dbConn)
 	resortRoomPhotoRepo := _resortRoomPhotoRepo.NewresortRoomPhotoRepository(dbConn)
 	resortRoomPaymentRepo := _resortRoomPaymentRepo.NewresortRoomPaymentRepository(dbConn)
@@ -210,6 +216,7 @@ func main() {
 	cityUsecase := _cityUcase.NewcityUsecase(adminUsecase, cityRepo, timeoutContext)
 	bankUsecase := _bankUcase.NewbankUsecase(adminUsecase, bankRepo, timeoutContext)
 	districtsUsecase := _districtsUcase.NewdistrictsUsecase(adminUsecase, districtsRepo, timeoutContext)
+	promoUsecase := _promoUcase.NewpromoUsecase(adminUsecase, promoRepo, timeoutContext)
 	amenitiesUsecase := _amenitiesUcase.NewAmenitiesUsecase(adminUsecase, amenitiesRepo, timeoutContext)
 	accessibilityUsecase := _accessibilityUcase.NewaccessibilityUsecase(adminUsecase, accessibilityRepo, timeoutContext)
 	reviewUsecase := _reviewUcase.NewreviewUsecase(userUsecase,reviewRepo,timeoutContext)
@@ -232,6 +239,7 @@ func main() {
 	_roleHttpDeliver.NewroleHandler(e, roleUsecase)
 	_bankHttpDeliver.NewbankHandler(e, bankUsecase)
 	_districtsHttpDeliver.NewdistrictsHandler(e, districtsUsecase)
+	_promoHttpDeliver.NewpromoHandler(e, promoUsecase)
 	_amenitiesHttpDeliver.NewAmenitiesHandler(e, amenitiesUsecase)
 	_accessibilityHttpDeliver.NewaccessibilityHandler(e, accessibilityUsecase)
 	log.Fatal(e.Start(":9090"))
