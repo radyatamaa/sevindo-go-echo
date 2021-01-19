@@ -223,11 +223,10 @@ func main() {
 
 	_reviewHttpDeliver.NewreviewHandler(e,reviewUsecase)
 	_resortHttpDeliver.NewresortHandler(e, resortUsecase)
-	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)
+	_branchHttpDeliver.NewbranchHandler(e, branchUsecase,isUsecase)
 	_currencyHttpDeliver.NewcurrencyHandler(e, currencyUsecase)
 	_userAdminHttpDeliver.NewuserAdminHandler(e, adminUsecase, isUsecase)
 	_countryHttpDeliver.NewcountryHandler(e, countryUsecase)
-	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)
 	_userHttpDeliver.NewuserHandler(e, userUsecase, isUsecase)
 	_isHttpDeliver.NewisHandler(e, userUsecase, isUsecase, adminUsecase)
 	_languageHttpDeliver.NewlanguageHandler(e, languageUsecase)
