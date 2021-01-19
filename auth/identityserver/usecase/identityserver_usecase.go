@@ -82,7 +82,7 @@ func (m identityserverUsecase) UploadFilePDFToBlob(bit []byte, folder string) (s
 	p := azblob.NewPipeline(credential, azblob.PipelineOptions{})
 
 	// Create a random string for the quick start container
-	containerName := "cgo-storage"
+	containerName := "bkniristorage"
 
 	// From the Azure portal, get your storage account blob service URL endpoint.
 	URL, _ := url.Parse(
@@ -291,7 +291,7 @@ func (m identityserverUsecase) UploadFileToBlob(image string, folder string) (st
 	p := azblob.NewPipeline(credential, azblob.PipelineOptions{})
 
 	// Create a random string for the quick start container
-	containerName := "cgo-storage"
+	containerName := "bkniristorage"
 
 	// From the Azure portal, get your storage account blob service URL endpoint.
 	URL, _ := url.Parse(
