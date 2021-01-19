@@ -6,5 +6,5 @@ import (
 )
 
 type Repository interface {
-	GetByResortRoomID(ctx context.Context, resortRoomId string) ([]*models.ResortRoomPayment, error)
+	GetByResortRoomID(ctx context.Context, resortRoomId string) ([]*models.ResortRoomPaymentJoin, error)
 }

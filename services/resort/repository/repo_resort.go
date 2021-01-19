@@ -17,6 +17,8 @@ type resortRepository struct {
 	Conn *sql.DB
 }
 
+
+
 // NewuserRepository will create an object that represent the article.repository interface
 func NewresortRepository(Conn *sql.DB) resort.Repository {
 	return &resortRepository{Conn}
@@ -76,6 +78,64 @@ func (m *resortRepository) fetchJoin(ctx context.Context, query string, args ...
 	return result, nil
 }
 
+func (m *resortRepository) fetchJoinDetail(ctx context.Context, query string, args ...interface{}) ([]*models.ResortJoinDetail, error) {
+	rows, err := m.Conn.QueryContext(ctx, query, args...)
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}()
+
+	result := make([]*models.ResortJoinDetail, 0)
+	for rows.Next() {
+		t := new(models.ResortJoinDetail)
+		err = rows.Scan(
+			&t.Id,
+			&t.CreatedBy,
+			&t.CreatedDate,
+			&t.ModifiedBy,
+			&t.ModifiedDate,
+			&t.DeletedBy,
+			&t.DeletedDate,
+			&t.IsDeleted,
+			&t.IsActive,
+			&t.ResortTitle,
+			&t.ResortDesc,
+			&t.ResortLongitude,
+			&t.ResortLatitude ,
+			&t.Status,
+			&t.	Rating 		,
+			&t.	BranchId 		,
+			&t.	DistrictsId 		,
+			&t.	DistrictsName 		,
+			&t.	CityId			,
+			&t.	CityName 		,
+			&t.	ProvinceId 		,
+			&t.	ProvinceName 	,
+			&t.	BranchName 		,
+			&t.ResortRoomId,
+			&t.ResortRoomTitle	,
+			&t.	ResortRoomDesc,
+			&t.ResortMaximumBookingAmount ,
+			&t.ResortCapacity		,
+		)
+
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+		result = append(result, t)
+	}
+
+	return result, nil
+}
+
 func (m resortRepository) GetAll(ctx context.Context, id []string, capacity int,limit ,offset int) ([]*models.ResortJoin, error) {
 	query := `SELECT r.*,	
 			d.districts_name,
@@ -99,6 +159,35 @@ func (m resortRepository) GetAll(ctx context.Context, id []string, capacity int,
 		query = query + ` LIMIT `+strconv.Itoa(limit)+` OFFSET `+ strconv.Itoa(offset) + ` `
 	}
 	list, err := m.fetchJoin(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return list, nil
+}
+
+func (m *resortRepository) GetById(ctx context.Context, id string) ([]*models.ResortJoinDetail, error) {
+	query := `SELECT r.*,	
+			d.districts_name,
+			d.city_id,
+			c.city_name,
+			c.province_id,
+			p.province_name,
+			b.branch_name,
+			rr.id as resort_room_id,
+			rr.resort_room_title,
+			rr.resort_room_desc,
+			rr.resort_maximum_booking_amount,
+			rr.resort_capacity
+		FROM resorts r
+		JOIN branches b on b.id = r.branch_id
+		JOIN districts d on d.id = r.districts_id
+		JOIN cities c on c.id = d.city_id
+		JOIN provinces p on p.id = c.province_id
+		JOIN resort_rooms rr on rr.resort_id = r.id
+		WHERE r.is_active = 1 and r.is_deleted = 0  and r.status = 2 and r.id = ?`
+
+	list, err := m.fetchJoinDetail(ctx, query,id)
 	if err != nil {
 		return nil, err
 	}

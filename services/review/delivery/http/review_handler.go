@@ -2,15 +2,13 @@ package http
 
 import (
 	"context"
-	"github.com/services/resort"
+	"github.com/labstack/echo"
+	"github.com/models"
+	"github.com/services/review"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/go-playground/validator.v9"
 	"net/http"
 	"strconv"
-
-	"github.com/labstack/echo"
-	validator "gopkg.in/go-playground/validator.v9"
-
-	"github.com/models"
 )
 
 // ResponseError represent the response error struct
@@ -19,17 +17,16 @@ type ResponseError struct {
 }
 
 // provinceHandler  represent the http handler for province
-type resortHandler struct {
-	resortUsecase resort.Usecase
+type reviewHandler struct {
+	reviewUsecase review.Usecase
 }
 
 // NewprovinceHandler will initialize the provinces/ resources endpoint
-func NewresortHandler(e *echo.Echo, us resort.Usecase) {
-	handler := &resortHandler{
-		resortUsecase: us,
+func NewreviewHandler(e *echo.Echo, us review.Usecase) {
+	handler := &reviewHandler{
+		reviewUsecase: us,
 	}
-	e.GET("/service/resort-search", handler.GetAll)
-	e.GET("/service/resort/:id", handler.GetDetail)
+	e.GET("/service/review", handler.GetReviewByResortId)
 }
 
 func isRequestValid(m *models.NewCommandProvince) (bool, error) {
@@ -41,13 +38,11 @@ func isRequestValid(m *models.NewCommandProvince) (bool, error) {
 	return true, nil
 }
 
-func (a *resortHandler) GetAll(c echo.Context) error {
+func (a *reviewHandler) GetReviewByResortId(c echo.Context) error {
 
+	resortId := c.QueryParam("resort_id")
 	qpage := c.QueryParam("page")
 	qperPage := c.QueryParam("size")
-	startDate := c.QueryParam("start_date")
-	endDate := c.QueryParam("end_date")
-	capacity := c.QueryParam("capacity")
 
 	var limit = 20
 	var page = 1
@@ -61,24 +56,8 @@ func (a *resortHandler) GetAll(c echo.Context) error {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	capc ,_:= strconv.Atoi(capacity)
-	result, err := a.resortUsecase.GetAll(ctx, page, limit, offset,capc,startDate,endDate)
-	if err != nil {
-		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
-	}
-	return c.JSON(http.StatusOK, result)
-}
 
-func (a *resortHandler) GetDetail(c echo.Context) error {
-
-	id := c.Param("id")
-
-	ctx := c.Request().Context()
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
-	result, err := a.resortUsecase.GetDetail(ctx, id)
+	result, err := a.reviewUsecase.GetAll(ctx,page,limit,offset,resortId)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
@@ -105,3 +84,5 @@ func getStatusCode(err error) int {
 		return http.StatusInternalServerError
 	}
 }
+
+

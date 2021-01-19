@@ -45,6 +45,7 @@ func main() {
 		migration := model.MigrationHistory{
 			DescMigration: "Add Table Country",
 			Date:          time.Now(),
+
 		}
 
 		db.Create(&migration)
@@ -179,11 +180,11 @@ func main() {
 		db.Create(&migration)
 	}
 
-	accessibilityResortRoom := model.AccessibilityResortRoom{}
-	erraccessibilityResortRoom := db.AutoMigrate(&accessibilityResortRoom).AddForeignKey("resort_room_id", "resort_rooms(id)", "RESTRICT", "RESTRICT")
+	accessibilityResortRoom := model.AccessibilityResort{}
+	erraccessibilityResortRoom := db.AutoMigrate(&accessibilityResortRoom).AddForeignKey("resort_id", "resorts(id)", "RESTRICT", "RESTRICT")
 	if erraccessibilityResortRoom != nil {
 		migration := model.MigrationHistory{
-			DescMigration: "Add Table AccessibilityResortRoom",
+			DescMigration: "Add Table AccessibilityResort",
 			Date:          time.Now(),
 		}
 
@@ -222,11 +223,11 @@ func main() {
 		db.Create(&migration)
 	}
 
-	amenitiesResortRoom := model.AmenitiesResortRoom{}
-	erramenitiesResortRoom := db.AutoMigrate(&amenitiesResortRoom).AddForeignKey("resort_room_id", "resort_rooms(id)", "RESTRICT", "RESTRICT")
+	amenitiesResortRoom := model.AmenitiesResort{}
+	erramenitiesResortRoom := db.AutoMigrate(&amenitiesResortRoom).AddForeignKey("resort_id", "resorts(id)", "RESTRICT", "RESTRICT")
 	if erramenitiesResortRoom != nil {
 		migration := model.MigrationHistory{
-			DescMigration: "Add Table AmenitiesResortRoom",
+			DescMigration: "Add Table AmenitiesResort",
 			Date:          time.Now(),
 		}
 
@@ -281,6 +282,132 @@ func main() {
 	if errbank != nil {
 		migration := model.MigrationHistory{
 			DescMigration: "Add Table Bank",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	booking := model.Booking{}
+	errBooking := db.AutoMigrate(&booking).AddForeignKey("user_id", "users(id)", "RESTRICT", "RESTRICT")
+	if errBooking != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Booking",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	errBooking1 := db.Model(&booking).AddForeignKey("resort_id", "resorts(id)", "RESTRICT", "RESTRICT")
+	if errBooking1 != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "add foregn key resort_id in table booking",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	errBooking2 := db.Model(&booking).AddForeignKey("resort_room_id", "resort_rooms(id)", "RESTRICT", "RESTRICT")
+	if errBooking2 != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "add foregn key resort_room_id in table booking",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	promo := model.Promo{}
+	errpromo := db.AutoMigrate(&promo)
+	if errpromo != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Promo",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	paymentMethod := model.PaymentMethod{}
+	errpaymentMethod := db.AutoMigrate(&paymentMethod)
+	if errpaymentMethod != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table PaymentMethod",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	GalleryExperience := model.GalleryExperience{}
+	errGalleryExperience := db.AutoMigrate(&GalleryExperience)
+	if errGalleryExperience != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table GalleryExperience",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	transaction := model.Transaction{}
+	errTransaction := db.AutoMigrate(&transaction).AddForeignKey("booking_id", "bookings(id)", "RESTRICT", "RESTRICT")
+	if errTransaction != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Transaction",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	errTransaction1 := db.Model(&transaction).AddForeignKey("promo_id", "promos(id)", "RESTRICT", "RESTRICT")
+	if errTransaction1 != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "add foregn key promo_id in table Transaction",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	errTransaction2 := db.Model(&transaction).AddForeignKey("payment_method_id", "payment_methods(id)", "RESTRICT", "RESTRICT")
+	if errTransaction2 != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "add foregn key payment_method_id in table Transaction",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	errTransaction3 := db.Model(&transaction).AddForeignKey("resort_room_payment", "resort_room_payments(id)", "RESTRICT", "RESTRICT")
+	if errTransaction3 != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "add foregn key resort_room_payment in table Transaction",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	review := model.Review{}
+	errreview := db.AutoMigrate(&review).AddForeignKey("user_id", "users(id)", "RESTRICT", "RESTRICT")
+	if errreview != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Review",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	errreview1 := db.Model(&review).AddForeignKey("transaction_id", "transactions(id)", "RESTRICT", "RESTRICT")
+	if errreview1 != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "add foregn key transaction_id in table Review",
 			Date:          time.Now(),
 		}
 

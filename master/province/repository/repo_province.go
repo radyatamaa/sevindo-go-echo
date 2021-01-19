@@ -185,7 +185,14 @@ func checkCount(rows *sql.Rows) (count int, err error) {
 }
 
 func (m *provinceRepository) List(ctx context.Context, limit, offset int) ([]*models.Province, error) {
-	
+	query := `SELECT * FROM provinces WHERE is_deleted = 0 and is_active = 1 `
 
-	return nil, nil
+	query = query + ` LIMIT ? OFFSET ?`
+	list, err := m.fetch(ctx, query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return list, nil
 }
+

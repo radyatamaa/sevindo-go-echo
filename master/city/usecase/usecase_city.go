@@ -13,7 +13,7 @@ import (
 
 type cityUsecase struct {
 	userAdminUsecase user_admin.Usecase
-	cityRepo    city.Repository
+	cityRepo   city.Repository
 	contextTimeout time.Duration
 }
 
