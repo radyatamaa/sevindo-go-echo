@@ -17,7 +17,8 @@ type ArticleBlog struct {
 	ArticleBlogName string     `json:"article_blog_name"`
 	Title           string     `json:"title" validate:"required"`
 	Description     string     `json:"description" validate:"required"`
-	CategoryId              *int        `json:"category_id"`
+	CategoryId              string       `json:"category_id"`
+	ArticlePicture	string `json:"article_picture"`
 }
 
 type NewCommandArticleBlog struct {
@@ -25,7 +26,8 @@ type NewCommandArticleBlog struct {
 	ArticleBlogName string `json:"article_blog_name"`
 	Title           string `json:"title" validate:"required"`
 	Description       string `json:"description" validate:"required"`
-	CategoryId             *int        `json:"category_id" `
+	CategoryId              string       `json:"category_id"`
+	ArticlePicture	string `json:"article_picture"`
 }
 
 type ArticleBlogDto struct {
@@ -33,7 +35,8 @@ type ArticleBlogDto struct {
 	ArticleBlogName string `json:"article_blog_name"`
 	Title           string `json:"title" validate:"required"`
 	Description       string `json:"description"`
-	CategoryId    *int `json:"category_id"`
+	CategoryId              string       `json:"category_id"`
+	ArticlePicture	string `json:"article_picture"`
 }
 
 type ArticleBlogWithPagination struct {
