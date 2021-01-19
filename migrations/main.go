@@ -393,4 +393,25 @@ func main() {
 		db.Create(&migration)
 	}
 
+	review := model.Review{}
+	errreview := db.AutoMigrate(&review).AddForeignKey("user_id", "users(id)", "RESTRICT", "RESTRICT")
+	if errreview != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Review",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
+	errreview1 := db.Model(&review).AddForeignKey("transaction_id", "transactions(id)", "RESTRICT", "RESTRICT")
+	if errreview1 != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "add foregn key transaction_id in table Review",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
 }
