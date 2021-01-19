@@ -3,31 +3,30 @@ package usecase
 import (
 	"context"
 	"github.com/auth/user_admin"
-	"github.com/master/city"
+	"github.com/master/accessibility"
+	"github.com/models"
 	"math"
 	"strconv"
 	"time"
-
-	"github.com/models"
 )
 
-type cityUsecase struct {
+type accessibilityUsecase struct {
 	userAdminUsecase user_admin.Usecase
-	cityRepo   city.Repository
+	accessibilityRepo    accessibility.Repository
 	contextTimeout time.Duration
 }
 
 
 
 // NewuserUsecase will create new an userUsecase object representation of user.Usecase interface
-func NewcityUsecase(	userAdminUsecase user_admin.Usecase,cityRepo city.Repository, timeout time.Duration) city.Usecase {
-	return &cityUsecase{
+func NewaccessibilityUsecase(	userAdminUsecase user_admin.Usecase,accessibilityRepo accessibility.Repository, timeout time.Duration) accessibility.Usecase {
+	return &accessibilityUsecase{
 		userAdminUsecase:userAdminUsecase,
-		cityRepo:    cityRepo,
+		accessibilityRepo:    accessibilityRepo,
 		contextTimeout: timeout,
 	}
 }
-func (m cityUsecase) Delete(c context.Context, id int, token string) (*models.ResponseDelete, error) {
+func (m accessibilityUsecase) Delete(c context.Context, id int, token string) (*models.ResponseDelete, error) {
 	ctx, cancel := context.WithTimeout(c, m.contextTimeout)
 	defer cancel()
 
@@ -36,7 +35,7 @@ func (m cityUsecase) Delete(c context.Context, id int, token string) (*models.Re
 		return nil,models.ErrUnAuthorize
 	}
 
-	err = m.cityRepo.Delete(ctx,id,currentUser.Email)
+	err = m.accessibilityRepo.Delete(ctx,id,currentUser.Email)
 
 	result := &models.ResponseDelete{
 		Id:      strconv.Itoa(id),
@@ -46,7 +45,7 @@ func (m cityUsecase) Delete(c context.Context, id int, token string) (*models.Re
 	return result,nil
 }
 
-func (m cityUsecase) Update(c context.Context, ar *models.NewCommandCity, token string) error {
+func (m accessibilityUsecase) Update(c context.Context, ar *models.NewCommandAccessibility, token string) error {
 	ctx, cancel := context.WithTimeout(c, m.contextTimeout)
 	defer cancel()
 
@@ -55,41 +54,39 @@ func (m cityUsecase) Update(c context.Context, ar *models.NewCommandCity, token 
 		return models.ErrUnAuthorize
 	}
 
-	getCity ,err := m.cityRepo.GetByID(ctx,ar.Id)
+	getAccessibility ,err := m.accessibilityRepo.GetByID(ctx,ar.Id)
 	if err != nil{
 		return err
 	}
 	var modifyBy string = currentUser.Email
 	now := time.Now()
-	getCity.CityName = ar.CityName
-	getCity.ProvinceId = ar.ProvinceId
-	getCity.ModifiedBy = &modifyBy
-	getCity.ModifiedDate = &now
-	err = m.cityRepo.Update(ctx,getCity)
+	getAccessibility.Name = ar.Name
+	getAccessibility.ModifiedBy = &modifyBy
+	getAccessibility.ModifiedDate = &now
+	err = m.accessibilityRepo.Update(ctx,getAccessibility)
 	if err != nil{
 		return err
 	}
 	return nil
 }
 
-func (m cityUsecase) List(ctx context.Context, page, limit, offset int, search string) (*models.CityWithPagination, error) {
+func (m accessibilityUsecase) List(ctx context.Context, page, limit, offset int, search string) (*models.AccessibilityWithPagination, error) {
 	ctx, cancel := context.WithTimeout(ctx, m.contextTimeout)
 	defer cancel()
 
-	list, err := m.cityRepo.List(ctx, limit, offset)
+	list, err := m.accessibilityRepo.List(ctx, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 
-	users := make([]*models.CityDto, len(list))
+	users := make([]*models.AccessibilityDto, len(list))
 	for i, item := range list {
-		users[i] = &models.CityDto{
+		users[i] = &models.AccessibilityDto{
 			Id:          item.Id,
-			CityName: item.CityName,
-			ProvinceId: item.ProvinceId,
+			Name: item.Name,
 		}
 	}
-	totalRecords, _ := m.cityRepo.Count(ctx)
+	totalRecords, _ := m.accessibilityRepo.Count(ctx)
 	totalPage := int(math.Ceil(float64(totalRecords) / float64(limit)))
 	prev := page
 	next := page
@@ -109,7 +106,7 @@ func (m cityUsecase) List(ctx context.Context, page, limit, offset int, search s
 		RecordPerPage: len(list),
 	}
 
-	response := &models.CityWithPagination{
+	response := &models.AccessibilityWithPagination{
 		Data: users,
 		Meta: meta,
 	}
@@ -117,7 +114,7 @@ func (m cityUsecase) List(ctx context.Context, page, limit, offset int, search s
 	return response, nil
 }
 
-func (m cityUsecase) Create(c context.Context, ar *models.NewCommandCity, token string) (*models.NewCommandCity, error) {
+func (m accessibilityUsecase) Create(c context.Context, ar *models.NewCommandAccessibility, token string) (*models.NewCommandAccessibility, error) {
 	ctx, cancel := context.WithTimeout(c, m.contextTimeout)
 	defer cancel()
 
@@ -126,7 +123,7 @@ func (m cityUsecase) Create(c context.Context, ar *models.NewCommandCity, token 
 		return nil,models.ErrUnAuthorize
 	}
 
-	insert := models.City{
+	insert := models.Accessibility{
 		Id:           0,
 		CreatedBy:    currentUser.Email,
 		CreatedDate:  time.Now(),
@@ -136,11 +133,10 @@ func (m cityUsecase) Create(c context.Context, ar *models.NewCommandCity, token 
 		DeletedDate:  nil,
 		IsDeleted:    0,
 		IsActive:     1,
-		CityName:  ar.CityName,
-		ProvinceId:  ar.ProvinceId,
+		Name:  ar.Name,
 	}
 
-	err = m.cityRepo.Insert(ctx, &insert)
+	err = m.accessibilityRepo.Insert(ctx, &insert)
 	if err != nil {
 		return nil, err
 	}
@@ -148,18 +144,18 @@ func (m cityUsecase) Create(c context.Context, ar *models.NewCommandCity, token 
 	return ar, nil
 }
 
-func (m cityUsecase) GetById(c context.Context, id int, token string) (*models.CityDto, error) {
+func (m accessibilityUsecase) GetById(c context.Context, id int, token string) (*models.AccessibilityDto, error) {
 	ctx, cancel := context.WithTimeout(c, m.contextTimeout)
 	defer cancel()
 
-	city, err := m.cityRepo.GetByID(ctx, id)
+	accessibility, err := m.accessibilityRepo.GetByID(ctx, id)
 	if err != nil {
 		return nil, models.ErrNotFound
 	}
 
-	result := &models.CityDto{
-		Id:          city.Id,
-		CityName: city.CityName,
+	result := &models.AccessibilityDto{
+		Id:          accessibility.Id,
+		Name: accessibility.Name,
 	}
 
 	return result, nil

@@ -4,30 +4,28 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/master/accessibility"
+	"github.com/models"
+	"github.com/sirupsen/logrus"
 	"strconv"
 	"time"
-
-	"github.com/sirupsen/logrus"
-
-	"github.com/master/province"
-	"github.com/models"
 )
 
 const (
 	timeFormat = "2006-01-02T15:04:05.999Z07:00" // reduce precision from RFC3339Nano as date format
 )
 
-type provinceRepository struct {
+type accessibilityRepository struct {
 	Conn *sql.DB
 }
 
 
 
 // NewuserRepository will create an object that represent the article.repository interface
-func NewProvinceRepository(Conn *sql.DB) province.Repository {
-	return &provinceRepository{Conn}
+func NewAccessibilityRepository(Conn *sql.DB) accessibility.Repository {
+	return &accessibilityRepository{Conn}
 }
-func (m *provinceRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.Province, error) {
+func (m *accessibilityRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.Accessibility, error) {
 	rows, err := m.Conn.QueryContext(ctx, query, args...)
 	if err != nil {
 		logrus.Error(err)
@@ -41,9 +39,9 @@ func (m *provinceRepository) fetch(ctx context.Context, query string, args ...in
 		}
 	}()
 
-	result := make([]*models.Province, 0)
+	result := make([]*models.Accessibility, 0)
 	for rows.Next() {
-		t := new(models.Province)
+		t := new(models.Accessibility)
 		err = rows.Scan(
 			&t.Id,
 			&t.CreatedBy,
@@ -54,8 +52,7 @@ func (m *provinceRepository) fetch(ctx context.Context, query string, args ...in
 			&t.DeletedDate,
 			&t.IsDeleted,
 			&t.IsActive,
-			&t.ProvinceName,
-			&t.CountryId,
+			&t.Name,
 		)
 
 		if err != nil {
@@ -67,8 +64,8 @@ func (m *provinceRepository) fetch(ctx context.Context, query string, args ...in
 
 	return result, nil
 }
-func (m *provinceRepository) GetByID(ctx context.Context, id int) (res *models.Province, err error) {
-	query := `SELECT * FROM provinces WHERE `
+func (m *accessibilityRepository) GetByID(ctx context.Context, id int) (res *models.Accessibility, err error) {
+	query := `SELECT * FROM accessibilities WHERE `
 
 	if id != 0 {
 		query = query + ` id = '` + strconv.Itoa(id) + `' `
@@ -88,15 +85,15 @@ func (m *provinceRepository) GetByID(ctx context.Context, id int) (res *models.P
 	return
 }
 
-func (m *provinceRepository) Update(ctx context.Context, a *models.Province) error {
-	query := `UPDATE provinces set modified_by=?, modified_date=? , province_name=?, country_id=?  WHERE id = ?`
+func (m *accessibilityRepository) Update(ctx context.Context, a *models.Accessibility) error {
+	query := `UPDATE accessibilities set modified_by=?, modified_date=? , name=?  WHERE id = ?`
 
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return nil
 	}
 
-	res, err := stmt.ExecContext(ctx, a.ModifiedBy, time.Now(), a.ProvinceName, a.CountryId,a.Id)
+	res, err := stmt.ExecContext(ctx, a.ModifiedBy, time.Now(), a.Name, a.Id)
 	if err != nil {
 		return err
 	}
@@ -113,8 +110,8 @@ func (m *provinceRepository) Update(ctx context.Context, a *models.Province) err
 	return nil
 }
 
-func (m *provinceRepository) Delete(ctx context.Context, id int, deleted_by string) error {
-	query := `UPDATE provinces SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE id =?`
+func (m *accessibilityRepository) Delete(ctx context.Context, id int, deleted_by string) error {
+	query := `UPDATE accessibilities SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE id =?`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -135,14 +132,14 @@ func (m *provinceRepository) Delete(ctx context.Context, id int, deleted_by stri
 }
 
 
-func (m *provinceRepository) Insert(ctx context.Context, a *models.Province) error {
-	query := `INSERT provinces SET id=? , created_by=? , created_date=? , modified_by=?, modified_date=? , deleted_by=? , deleted_date=? , is_deleted=? , is_active=? ,
-	province_name=?, country_id=?`
+func (m *accessibilityRepository) Insert(ctx context.Context, a *models.Accessibility) error {
+	query := `INSERT accessibilities SET id=? , created_by=? , created_date=? , modified_by=?, modified_date=? , deleted_by=? , deleted_date=? , is_deleted=? , is_active=? ,
+	name=?`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err
 	}
-	_, err = stmt.ExecContext(ctx, a.Id, a.CreatedBy, time.Now(), nil, nil, nil, nil, 0, 1, a.ProvinceName, a.CountryId)
+	_, err = stmt.ExecContext(ctx, a.Id, a.CreatedBy, time.Now(), nil, nil, nil, nil, 0, 1, a.Name)
 	if err != nil {
 		return err
 	}
@@ -156,8 +153,8 @@ func (m *provinceRepository) Insert(ctx context.Context, a *models.Province) err
 	return nil
 }
 
-func (m *provinceRepository) Count(ctx context.Context) (int, error) {
-	query := `SELECT count(*) AS count FROM provinces WHERE is_deleted = 0 and is_active = 1`
+func (m *accessibilityRepository) Count(ctx context.Context) (int, error) {
+	query := `SELECT count(*) AS count FROM accessibilities WHERE is_deleted = 0 and is_active = 1`
 
 	rows, err := m.Conn.QueryContext(ctx, query)
 	if err != nil {
@@ -184,8 +181,8 @@ func checkCount(rows *sql.Rows) (count int, err error) {
 	return count, nil
 }
 
-func (m *provinceRepository) List(ctx context.Context, limit, offset int) ([]*models.Province, error) {
-	query := `SELECT * FROM provinces WHERE is_deleted = 0 and is_active = 1 `
+func (m *accessibilityRepository) List(ctx context.Context, limit, offset int) ([]*models.Accessibility, error) {
+	query := `SELECT * FROM accessibilities WHERE is_deleted = 0 and is_active = 1 `
 
 	query = query + ` LIMIT ? OFFSET ?`
 	list, err := m.fetch(ctx, query, limit, offset)
@@ -195,4 +192,3 @@ func (m *provinceRepository) List(ctx context.Context, limit, offset int) ([]*mo
 
 	return list, nil
 }
-
