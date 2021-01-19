@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"github.com/auth/user_admin"
+	"github.com/google/uuid"
 	"github.com/master/promo"
 	"math"
 	"time"
@@ -155,6 +156,7 @@ func (m promoUsecase) Create(c context.Context, ar *models.NewCommandPromo, toke
 
 	insert := models.Promo{
 		//Id:           0,
+		Id:            uuid.New().String(),
 		CreatedBy:    currentUser.Email,
 		CreatedDate:  time.Now(),
 		ModifiedBy:   nil,
@@ -185,7 +187,7 @@ func (m promoUsecase) Create(c context.Context, ar *models.NewCommandPromo, toke
 	if err != nil {
 		return nil, err
 	}
-
+	ar.Id = insert.Id
 	return ar, nil
 }
 

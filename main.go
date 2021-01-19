@@ -86,6 +86,10 @@ import (
 	_promoRepo "github.com/master/promo/repository"
 	_promoUcase "github.com/master/promo/usecase"
 
+	_galleryexperienceHttpDeliver "github.com/master/gallery_experience/delivery/http"
+	_galleryexperienceRepo "github.com/master/gallery_experience/repository"
+	_galleryexperienceUcase "github.com/master/gallery_experience/usecase"
+
 
 	_amenitiesHttpDeliver "github.com/master/amenities/delivery/http"
 	_amenitiesRepo "github.com/master/amenities/repository"
@@ -190,6 +194,7 @@ func main() {
 	bankRepo := _bankRepo.NewBankRepository(dbConn)
 	districtsRepo := _districtsRepo.NewDistrictsRepository(dbConn)
 	promoRepo := _promoRepo.NewPromoRepository(dbConn)
+	galleryexperienceRepo := _galleryexperienceRepo.NewGalleryExperienceRepository(dbConn)
 	amenitiesRepo := _amenitiesRepo.NewAmenitiesRepository(dbConn)
 	resortRoomPhotoRepo := _resortRoomPhotoRepo.NewresortRoomPhotoRepository(dbConn)
 	resortRoomPaymentRepo := _resortRoomPaymentRepo.NewresortRoomPaymentRepository(dbConn)
@@ -217,6 +222,7 @@ func main() {
 	bankUsecase := _bankUcase.NewbankUsecase(adminUsecase, bankRepo, timeoutContext)
 	districtsUsecase := _districtsUcase.NewdistrictsUsecase(adminUsecase, districtsRepo, timeoutContext)
 	promoUsecase := _promoUcase.NewpromoUsecase(adminUsecase, promoRepo, timeoutContext)
+	galleryexperienceUsecase := _galleryexperienceUcase.NewGalleyExperienceUsecase(adminUsecase, galleryexperienceRepo, timeoutContext)
 	amenitiesUsecase := _amenitiesUcase.NewAmenitiesUsecase(adminUsecase, amenitiesRepo, timeoutContext)
 	accessibilityUsecase := _accessibilityUcase.NewaccessibilityUsecase(adminUsecase, accessibilityRepo, timeoutContext)
 	reviewUsecase := _reviewUcase.NewreviewUsecase(userUsecase,reviewRepo,timeoutContext)
@@ -239,6 +245,7 @@ func main() {
 	_bankHttpDeliver.NewbankHandler(e, bankUsecase)
 	_districtsHttpDeliver.NewdistrictsHandler(e, districtsUsecase)
 	_promoHttpDeliver.NewpromoHandler(e, promoUsecase)
+	_galleryexperienceHttpDeliver.NewGalleryExperienceHandler(e, galleryexperienceUsecase)
 	_amenitiesHttpDeliver.NewAmenitiesHandler(e, amenitiesUsecase)
 	_accessibilityHttpDeliver.NewaccessibilityHandler(e, accessibilityUsecase)
 	log.Fatal(e.Start(":9090"))
