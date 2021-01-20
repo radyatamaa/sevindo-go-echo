@@ -150,6 +150,7 @@ func (m branchUsecase) Create(c context.Context, ar *models.NewCommandBranch, to
 	}
 
 	err = m.branchRepo.Insert(ctx, &insert)
+	ar.Id = insert.Id
 	if err != nil {
 		return nil, err
 	}
