@@ -98,7 +98,7 @@ func (m *articleblogRepository) Update(ctx context.Context, ar *models.ArticleBl
 		return nil
 	}
 
-	res, err := stmt.ExecContext(ctx, ar.ModifiedBy, time.Now(), ar.ArticleBlogName, ar.Id, ar.Title, ar.Description, ar.CategoryId)
+	res, err := stmt.ExecContext(ctx, ar.ModifiedBy, time.Now(), ar.ArticleBlogName, ar.Title, ar.Description, ar.CategoryId, ar.ArticlePicture,ar.Id)
 	if err != nil {
 		return err
 	}
