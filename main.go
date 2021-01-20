@@ -259,8 +259,9 @@ func main() {
 	_roleHttpDeliver.NewroleHandler(e, roleUsecase)
 	_bankHttpDeliver.NewbankHandler(e, bankUsecase)
 	_districtsHttpDeliver.NewdistrictsHandler(e, districtsUsecase)
-	_promoHttpDeliver.NewpromoHandler(e, promoUsecase)
+
 	_galleryexperienceHttpDeliver.NewGalleryExperienceHandler(e, galleryexperienceUsecase,isUsecase)
+	_promoHttpDeliver.NewpromoHandler(e, promoUsecase, isUsecase)
 	_amenitiesHttpDeliver.NewAmenitiesHandler(e, amenitiesUsecase)
 	_accessibilityHttpDeliver.NewaccessibilityHandler(e, accessibilityUsecase)
 	log.Fatal(e.Start(":9090"))

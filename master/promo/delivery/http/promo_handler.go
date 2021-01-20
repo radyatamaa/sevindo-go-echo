@@ -2,7 +2,11 @@ package http
 
 import (
 	"context"
+	"github.com/auth/identityserver"
 	"github.com/master/promo"
+	"io"
+	"os"
+	"path/filepath"
 
 	"net/http"
 	"strconv"
@@ -21,12 +25,14 @@ type ResponseError struct {
 
 // countryHandler  represent the http handler for country
 type promoHandler struct {
+	isUsecase identityserver.Usecase
 	promoUsecase promo.Usecase
 }
 
 // NewpromoHandler will initialize the countrys/ resources endpoint
-func NewpromoHandler(e *echo.Echo, us promo.Usecase) {
+func NewpromoHandler(e *echo.Echo, us promo.Usecase, isUsecase identityserver.Usecase) {
 	handler := &promoHandler{
+		isUsecase:isUsecase,
 		promoUsecase: us,
 	}
 	e.POST("/master/promo", handler.Create)
@@ -84,23 +90,99 @@ func (a *promoHandler) Create(c echo.Context) error {
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
 
-	if token == "" {
-		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
-	}
-
-
-	var promo models.NewCommandPromo
-	err := c.Bind(&promo)
+	filupload, image, _ := c.Request().FormFile("promo_image")
+	dir, err := os.Getwd()
 	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return models.ErrInternalServerError
 	}
+	var imagePath string
+	if filupload != nil {
+		fileLocation := filepath.Join(dir, "files", image.Filename)
+		targetFile, err := os.OpenFile(fileLocation, os.O_WRONLY|os.O_CREATE, 0666)
+		if err != nil {
+			os.MkdirAll(filepath.Join(dir, "files"), os.ModePerm)
+			return models.ErrInternalServerError
+		}
+		defer targetFile.Close()
+
+		if _, err := io.Copy(targetFile, filupload); err != nil {
+			return models.ErrInternalServerError
+		}
+
+		//w.Write([]byte("done"))
+		imagePat, _ := a.isUsecase.UploadFileToBlob(fileLocation, "Promo")
+		imagePath = imagePat
+		targetFile.Close()
+		errRemove := os.Remove(fileLocation)
+		if errRemove != nil {
+			return models.ErrInternalServerError
+		}
+	}
+	var start_date *string
+	promo := 	c.FormValue("start_date")
+	if promo != ""{
+		start_date = &promo
+	}
+	var end_date *string
+	promo1 := c.FormValue("end_date")
+	if promo1 != ""{
+		end_date = &promo1
+	}
+	var how_to_get *string
+	promo2 := c.FormValue("how_to_get")
+	if promo2 != ""{
+		how_to_get = &promo2
+	}
+	var how_to_use *string
+	promo3 := c.FormValue("how_to_use")
+	if promo3 != ""{
+		how_to_use = &promo3
+	}
+	var term_condition *string
+	promo4 := c.FormValue("term_condition")
+	if promo4 != ""{
+		term_condition = &promo4
+	}
+	var disclaimer *string
+	promo5 := c.FormValue("disclaimer")
+	if promo5 != ""{
+		disclaimer = &promo5
+	}
+
+	promo_value, _ := strconv.ParseFloat(c.FormValue("promo_value"),64)
+	max_discount, _ := strconv.ParseFloat(c.FormValue("max_discount"),32)
+	promo_type, _ := strconv.Atoi(c.FormValue("promo_type"))
+	max_usage, _ := strconv.Atoi(c.FormValue("max_usage"))
+	production_capacity, _ := strconv.Atoi(c.FormValue("production_capacity"))
+	currency_id, _ := strconv.Atoi(c.FormValue("currency_id"))
+	max := float32(max_discount)
+	userCommand := models.NewCommandPromo{
+		Id:            		c.FormValue("id"),
+		PromoCode:   	 	c.FormValue("promo_code"),
+		PromoName:    		c.FormValue("promo_name"),
+		PromoDesc:       	c.FormValue("promo_desc"),
+		PromoValue:       	promo_value,
+		PromoType:       	promo_type,
+		PromoImage: 		imagePath,
+		StartDate:       	start_date,
+		EndDate:       		end_date,
+		HowToGet:       	how_to_get,
+		HowToUse:       	how_to_use,
+		TermCondition:     term_condition,
+		Disclaimer:       	disclaimer,
+		MaxDiscount:        &max,
+		MaxUsage:       	&max_usage,
+		ProductionCapacity: &production_capacity,
+		CurrencyId:       	&currency_id,
+	}
+
 
 	ctx := c.Request().Context()
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	res,err := a.promoUsecase.Create(ctx, &promo, token)
+	res,err := a.promoUsecase.Create(ctx, &userCommand, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
@@ -137,23 +219,105 @@ func (a *promoHandler) UpdatePromo(c echo.Context) error {
 	}
 
 	id := c.Param("id")
-	var promo models.NewCommandPromo
-	promo.Id = id
-	err := c.Bind(&promo)
+	//ids ,_:= strconv.Atoi(id)
+	filupload, image, _ := c.Request().FormFile("promo_image")
+	dir, err := os.Getwd()
 	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return models.ErrInternalServerError
 	}
+	var imagePath string
+	if filupload != nil {
+		fileLocation := filepath.Join(dir, "files", image.Filename)
+		targetFile, err := os.OpenFile(fileLocation, os.O_WRONLY|os.O_CREATE, 0666)
+		if err != nil {
+			os.MkdirAll(filepath.Join(dir, "files"), os.ModePerm)
+			return models.ErrInternalServerError
+		}
+		defer targetFile.Close()
+
+		if _, err := io.Copy(targetFile, filupload); err != nil {
+			return models.ErrInternalServerError
+		}
+
+		//w.Write([]byte("done"))
+		imagePat, _ := a.isUsecase.UploadFileToBlob(fileLocation, "Promo")
+		imagePath = imagePat
+		targetFile.Close()
+		errRemove := os.Remove(fileLocation)
+		if errRemove != nil {
+			return models.ErrInternalServerError
+		}
+	}
+
+	var start_date *string
+	promo := 	c.FormValue("start_date")
+	if promo != ""{
+		start_date = &promo
+	}
+	var end_date *string
+	promo1 := c.FormValue("end_date")
+	if promo1 != ""{
+		end_date = &promo1
+	}
+	var how_to_get *string
+	promo2 := c.FormValue("how_to_get")
+	if promo2 != ""{
+		how_to_get = &promo2
+	}
+	var how_to_use *string
+	promo3 := c.FormValue("how_to_use")
+	if promo3 != ""{
+		how_to_use = &promo3
+	}
+	var term_condition *string
+	promo4 := c.FormValue("term_condition")
+	if promo4 != ""{
+		term_condition = &promo4
+	}
+	var disclaimer *string
+	promo5 := c.FormValue("disclaimer")
+	if promo5 != ""{
+		disclaimer = &promo5
+	}
+
+	promo_value, _ := strconv.ParseFloat(c.FormValue("promo_value"),64)
+	max_discount, _ := strconv.ParseFloat(c.FormValue("max_discount"),32)
+	promo_type, _ := strconv.Atoi(c.FormValue("promo_type"))
+	max_usage, _ := strconv.Atoi(c.FormValue("max_usage"))
+	production_capacity, _ := strconv.Atoi(c.FormValue("production_capacity"))
+	currency_id, _ := strconv.Atoi(c.FormValue("currency_id"))
+	max := float32(max_discount)
+	userCommand := models.NewCommandPromo{
+		Id:            id,
+		PromoCode:   	 	c.FormValue("promo_code"),
+		PromoName:    		c.FormValue("promo_name"),
+		PromoDesc:       	c.FormValue("promo_desc"),
+		PromoValue:       	promo_value,
+		PromoType:       	promo_type,
+		PromoImage: 		imagePath,
+		StartDate:       	start_date,
+		EndDate:       		end_date,
+		HowToGet:       	how_to_get,
+		HowToUse:       	how_to_use,
+		TermCondition:     term_condition,
+		Disclaimer:       	disclaimer,
+		MaxDiscount:        &max,
+		MaxUsage:       	&max_usage,
+		ProductionCapacity: &production_capacity,
+		CurrencyId:       	&currency_id,
+	}
+
 
 	ctx := c.Request().Context()
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	err = a.promoUsecase.Update(ctx, &promo, token)
+	err = a.promoUsecase.Update(ctx, &userCommand, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
-	return c.JSON(http.StatusOK, promo)
+	return c.JSON(http.StatusOK, userCommand)
 }
 
 func (a *promoHandler) Delete (c echo.Context) error {
