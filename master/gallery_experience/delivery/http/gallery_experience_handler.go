@@ -2,15 +2,16 @@ package http
 
 import (
 	"context"
+	"github.com/auth/identityserver"
 	"github.com/master/gallery_experience"
-
+	"io"
+	"os"
+	"path/filepath"
 	"net/http"
 	"strconv"
-
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
 	validator "gopkg.in/go-playground/validator.v9"
-
 	"github.com/models"
 )
 
@@ -21,12 +22,14 @@ type ResponseError struct {
 
 // countryHandler  represent the http handler for country
 type galleryexperienceHandler struct {
+	isUsecase identityserver.Usecase
 	galleyexperienceUsecase gallery_experience.Usecase
 }
 
 // NewpromoHandler will initialize the countrys/ resources endpoint
-func NewGalleryExperienceHandler(e *echo.Echo, us gallery_experience.Usecase) {
+func NewGalleryExperienceHandler(e *echo.Echo, us gallery_experience.Usecase,	isUsecase identityserver.Usecase) {
 	handler := &galleryexperienceHandler{
+		isUsecase:isUsecase,
 		galleyexperienceUsecase: us,
 	}
 	e.POST("/master/gallery_experience", handler.Create)
@@ -84,23 +87,54 @@ func (a *galleryexperienceHandler) Create(c echo.Context) error {
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	token := c.Request().Header.Get("Authorization")
 
-	if token == "" {
-		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
-	}
-
-
-	var promo models.NewCommandGalleryExperience
-	err := c.Bind(&promo)
+	filupload, image, _ := c.Request().FormFile("experience_picture")
+	dir, err := os.Getwd()
 	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return models.ErrInternalServerError
 	}
+	var imagePath string
+	if filupload != nil {
+		fileLocation := filepath.Join(dir, "files", image.Filename)
+		targetFile, err := os.OpenFile(fileLocation, os.O_WRONLY|os.O_CREATE, 0666)
+		if err != nil {
+			os.MkdirAll(filepath.Join(dir, "files"), os.ModePerm)
+			return models.ErrInternalServerError
+		}
+		defer targetFile.Close()
+
+		if _, err := io.Copy(targetFile, filupload); err != nil {
+			return models.ErrInternalServerError
+		}
+
+		//w.Write([]byte("done"))
+		imagePat, _ := a.isUsecase.UploadFileToBlob(fileLocation, "GalleryExperience")
+		imagePath = imagePat
+		targetFile.Close()
+		errRemove := os.Remove(fileLocation)
+		if errRemove != nil {
+			return models.ErrInternalServerError
+		}
+	}
+
+	longitude, _ := strconv.ParseFloat(c.FormValue("longitude"),64)
+	latitude, _ := strconv.ParseFloat(c.FormValue("latitude"),64)
+
+	userCommand := models.NewCommandGalleryExperience{
+		Id:                c.FormValue("id"),
+		ExperienceName:    c.FormValue("experience_name"),
+		ExperienceDesc:    c.FormValue("experience_desc"),
+		ExperiencePicture: &imagePath,
+		Longitude:         longitude,
+		Latitude:          latitude,
+	}
+
 
 	ctx := c.Request().Context()
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	res,err := a.galleyexperienceUsecase.Create(ctx, &promo, token)
+	res,err := a.galleyexperienceUsecase.Create(ctx, &userCommand, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
@@ -136,12 +170,47 @@ func (a *galleryexperienceHandler) UpdateGalleryExperience(c echo.Context) error
 		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
 	}
 
-	id := c.Param("id")
-	var promo models.NewCommandGalleryExperience
-	promo.Id = id
-	err := c.Bind(&promo)
+	//id := c.Param("id")
+	//==ids ,_:= strconv.Atoi(id)
+	filupload, image, _ := c.Request().FormFile("experience_picture")
+	dir, err := os.Getwd()
 	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return models.ErrInternalServerError
+	}
+	var imagePath string
+	if filupload != nil {
+		fileLocation := filepath.Join(dir, "files", image.Filename)
+		targetFile, err := os.OpenFile(fileLocation, os.O_WRONLY|os.O_CREATE, 0666)
+		if err != nil {
+			os.MkdirAll(filepath.Join(dir, "files"), os.ModePerm)
+			return models.ErrInternalServerError
+		}
+		defer targetFile.Close()
+
+		if _, err := io.Copy(targetFile, filupload); err != nil {
+			return models.ErrInternalServerError
+		}
+
+		//w.Write([]byte("done"))
+		imagePat, _ := a.isUsecase.UploadFileToBlob(fileLocation, "GalleryExperience")
+		imagePath = imagePat
+		targetFile.Close()
+		errRemove := os.Remove(fileLocation)
+		if errRemove != nil {
+			return models.ErrInternalServerError
+		}
+	}
+
+	longitude, _ := strconv.ParseFloat(c.FormValue("longitude"),64)
+	latitude, _ := strconv.ParseFloat(c.FormValue("latitude"),64)
+
+	userCommand := models.NewCommandGalleryExperience{
+		Id:                c.FormValue("id"),
+		ExperienceName:    c.FormValue("experience_name"),
+		ExperienceDesc:    c.FormValue("experience_desc"),
+		ExperiencePicture: &imagePath,
+		Longitude:         longitude,
+		Latitude:          latitude,
 	}
 
 	ctx := c.Request().Context()
@@ -149,11 +218,11 @@ func (a *galleryexperienceHandler) UpdateGalleryExperience(c echo.Context) error
 		ctx = context.Background()
 	}
 
-	err = a.galleyexperienceUsecase.Update(ctx, &promo, token)
+	err = a.galleyexperienceUsecase.Update(ctx, &userCommand, token)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
-	return c.JSON(http.StatusOK, promo)
+	return c.JSON(http.StatusOK, userCommand)
 }
 
 func (a *galleryexperienceHandler) Delete (c echo.Context) error {
