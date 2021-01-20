@@ -414,4 +414,15 @@ func main() {
 		db.Create(&migration)
 	}
 
+	contact := model.Contact{}
+	errcontact := db.AutoMigrate(&contact).AddForeignKey("user_id", "users(id)", "RESTRICT", "RESTRICT")
+	if errcontact != nil {
+		migration := model.MigrationHistory{
+			DescMigration: "Add Table Contact",
+			Date:          time.Now(),
+		}
+
+		db.Create(&migration)
+	}
+
 }
