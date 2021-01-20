@@ -2,9 +2,11 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/auth/identityserver"
 	"github.com/auth/user"
 	"github.com/booking/booking"
+	guuid "github.com/google/uuid"
 	"github.com/models"
 	"github.com/skip2/go-qrcode"
 	"io/ioutil"
@@ -33,83 +35,88 @@ func NewbookingUsecase(			isUsecase identityserver.Usecase,userUsecase user.Usec
 }
 
 func (b bookingUsecase) Insert(c context.Context, booking *models.NewBookingCommand,token string) ([]*models.NewBookingCommand, error, error) {
-	//ctx, cancel := context.WithTimeout(c, b.contextTimeout)
-	//defer cancel()
-	//
-	//layoutFormat := "2006-01-02 15:04:05"
-	//bookingDate, errDate := time.Parse(layoutFormat, booking.BookingDate)
-	//if errDate != nil {
-	//	return nil, errDate, nil
-	//}
-	//orderId, err := generateRandomString(12)
-	//if err != nil {
-	//	return nil, models.ErrInternalServerError, nil
-	//}
-	//
-	//// re-generate if duplicate order id
-	//if b.bookingRepo.CheckBookingCode(ctx, orderId) {
-	//	orderId, err = generateRandomString(12)
-	//	if err != nil {
-	//		return nil, models.ErrInternalServerError, nil
-	//	}
-	//}
-	//
-	//ticketCode, err := generateRandomString(12)
-	//if err != nil {
-	//	return nil, models.ErrInternalServerError, nil
-	//}
-	//var createdBy string
-	//if token != "" {
-	//	currentUser, err := b.userUsecase.ValidateTokenUser(ctx, token)
-	//	if err != nil {
-	//		return nil, err, nil
-	//	}
-	//	createdBy = currentUser.UserEmail
-	//} else {
-	//	createdBy = booking.BookedByEmail
-	//}
-	//booking.OrderId = orderId
-	//booking.TicketCode = ticketCode
-	//fileNameQrCode, err := generateQRCode(orderId)
-	//if err != nil {
-	//	return nil, models.ErrInternalServerError, nil
-	//}
-	//imagePath, _ := b.isUsecase.UploadFileToBlob(*fileNameQrCode, "TicketBookingQRCode")
-	//
-	//errRemove := os.Remove(*fileNameQrCode)
-	//if errRemove != nil {
-	//	return nil, models.ErrInternalServerError, nil
-	//}
-	//booking.TicketQRCode = imagePath
-	//
-	//
-	//bookingM := models.Booking{
-	//	Id:                 guuid.New().String(),
-	//	CreatedBy:          createdBy,
-	//	CreatedDate:        time.Now(),
-	//	ModifiedBy:         nil,
-	//	ModifiedDate:       nil,
-	//	DeletedBy:          nil,
-	//	DeletedDate:        nil,
-	//	IsDeleted:          0,
-	//	IsActive:           1,
-	//	OrderId:            orderId,
-	//	GuestDesc:          "",
-	//	BookedBy:           "",
-	//	BookedByEmail:      "",
-	//	BookingDate:        time.Time{},
-	//	ExpiredDatePayment: nil,
-	//	UserId:             nil,
-	//	Status:             0,
-	//	TicketCode:         "",
-	//	TicketQRCode:       "",
-	//	PaymentUrl:         nil,
-	//	ResortId:           nil,
-	//	ResortRoomId:       nil,
-	//	CheckInDate:        nil,
-	//	CheckOutDate:       nil,
-	//}
-	return nil, nil, nil
+	ctx, cancel := context.WithTimeout(c, b.contextTimeout)
+	defer cancel()
+
+	layoutFormat := "2006-01-02 15:04:05"
+	bookingDate, errDate := time.Parse(layoutFormat, booking.BookingDate)
+	if errDate != nil {
+		return nil, errDate, nil
+	}
+	orderId, err := generateRandomString(12)
+	if err != nil {
+		return nil, models.ErrInternalServerError, nil
+	}
+
+	// re-generate if duplicate order id
+	if b.bookingRepo.CheckBookingCode(ctx, orderId) {
+		orderId, err = generateRandomString(12)
+		if err != nil {
+			return nil, models.ErrInternalServerError, nil
+		}
+	}
+
+	ticketCode, err := generateRandomString(12)
+	if err != nil {
+		return nil, models.ErrInternalServerError, nil
+	}
+	var createdBy string
+	if token != "" {
+		currentUser, err := b.userUsecase.ValidateTokenUser(ctx, token)
+		if err != nil {
+			return nil, err, nil
+		}
+		createdBy = currentUser.UserEmail
+	} else {
+		createdBy = booking.BookedByEmail
+	}
+
+	fileNameQrCode, err := generateQRCode(orderId)
+	if err != nil {
+		return nil, models.ErrInternalServerError, nil
+	}
+	imagePath, _ := b.isUsecase.UploadFileToBlob(*fileNameQrCode, "TicketBookingQRCode")
+
+	errRemove := os.Remove(*fileNameQrCode)
+	if errRemove != nil {
+		return nil, models.ErrInternalServerError, nil
+	}
+
+	expIntineraryStartEndPoint, _ := json.Marshal(booking.GuestDesc)
+	bookingM := models.Booking{
+		Id:                 guuid.New().String(),
+		CreatedBy:          createdBy,
+		CreatedDate:        time.Now(),
+		ModifiedBy:         nil,
+		ModifiedDate:       nil,
+		DeletedBy:          nil,
+		DeletedDate:        nil,
+		IsDeleted:          0,
+		IsActive:           1,
+		OrderId:            orderId,
+		GuestDesc:          string(expIntineraryStartEndPoint),
+		BookedBy:           createdBy,
+		BookedByEmail:      createdBy,
+		BookingDate:        bookingDate,
+		ExpiredDatePayment: nil,
+		UserId:             &booking.UserId,
+		Status:             0,
+		TicketCode:         ticketCode,
+		TicketQRCode:       imagePath,
+		PaymentUrl:         nil,
+		ResortId:           &booking.ResortId,
+		ResortRoomId:       &booking.ResortRoomId,
+		CheckInDate:        &booking.CheckInDate,
+		CheckOutDate:       &booking.CheckOutDate,
+	}
+	_,err = b.bookingRepo.Insert(ctx,&bookingM)
+	if err != nil {
+		return nil, err, nil
+	}
+	booking.Id = bookingM.Id
+	var result []*models.NewBookingCommand
+	result = append(result,booking)
+	return result, nil, nil
 }
 
 func generateRandomString(n int) (string, error) {

@@ -105,6 +105,10 @@ import (
 	_reviewHttpDeliver "github.com/services/review/delivery/http"
 	_reviewRepo "github.com/services/review/repository"
 	_reviewUcase "github.com/services/review/usecase"
+
+	_bookingHttpDeliver "github.com/booking/booking/delivery/http"
+	_bookingRepo "github.com/booking/booking/repository"
+	_bookingUcase "github.com/booking/booking/usecase"
 )
 
 func main() {
@@ -203,6 +207,7 @@ func main() {
 	accessibilityResortRepo := _accessibilityResortRepo.NewaccessibilityResortRepository(dbConn)
 	amenitiesResortRepo := _amenitiesResortRepo.NewamenitiesResortRepository(dbConn)
 	reviewRepo := _reviewRepo.NewreviewRepository(dbConn)
+	bookingRepo := _bookingRepo.NewbookingRepository(dbConn)
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
@@ -226,7 +231,9 @@ func main() {
 	amenitiesUsecase := _amenitiesUcase.NewAmenitiesUsecase(adminUsecase, amenitiesRepo, timeoutContext)
 	accessibilityUsecase := _accessibilityUcase.NewaccessibilityUsecase(adminUsecase, accessibilityRepo, timeoutContext)
 	reviewUsecase := _reviewUcase.NewreviewUsecase(userUsecase,reviewRepo,timeoutContext)
+	bookingUsecase := _bookingUcase.NewbookingUsecase(isUsecase,userUsecase,bookingRepo,timeoutContext)
 
+	_bookingHttpDeliver.NewaBookingHandler(e,bookingUsecase)
 	_reviewHttpDeliver.NewreviewHandler(e,reviewUsecase)
 	_resortHttpDeliver.NewresortHandler(e, resortUsecase)
 	_branchHttpDeliver.NewbranchHandler(e, branchUsecase,isUsecase)

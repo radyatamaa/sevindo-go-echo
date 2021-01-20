@@ -31,15 +31,10 @@ type Booking struct {
 
 type NewBookingCommand struct {
 	Id                string   `json:"id"`
-	ExpId             string   `json:"exp_id"`
 	GuestDesc         []GuestDescObj   `json:"guest_desc"`
 	BookedByEmail     string   `json:"booked_by_email"`
 	BookingDate       string   `json:"booking_date"`
 	UserId            string  `json:"user_id"`
-	Status            string   `json:"status"`
-	OrderId           string   `json:"order_id"`
-	TicketCode        string   `json:"ticket_code"`
-	TicketQRCode      string   `json:"ticket_qr_code"`
 	CheckInDate 		string `json:"check_in_date"`
 	CheckOutDate 		string `json:"check_out_date"`
 	ResortId 		 	string `json:"resort_id"`
