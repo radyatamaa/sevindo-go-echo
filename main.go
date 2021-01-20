@@ -253,7 +253,7 @@ func main() {
 	_languageHttpDeliver.NewlanguageHandler(e, languageUsecase)
 	_provinceHttpDeliver.NewprovinceHandler(e, provinceUsecase)
 	_articlecategoryHttpDeliver.NewArticleCategoryHandler(e, articlecategoryUsecase)
-	_articleblogHttpDeliver.NewArticleBlogHandler(e, articleblogUsecase)
+	_articleblogHttpDeliver.NewArticleBlogHandler(e,articleblogUsecase, isUsecase)
 	_cityHttpDeliver.NewcityHandler(e, cityUsecase)
 	_articleHttpDeliver.NewArticleHandler(e, au)
 	_roleHttpDeliver.NewroleHandler(e, roleUsecase)

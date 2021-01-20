@@ -57,6 +57,7 @@ func (m *articleblogRepository) fetch(ctx context.Context, query string, args ..
 			&t.Title,
 			&t.Description,
 			&t.CategoryId,
+			&t.ArticlePicture,
 		)
 
 		if err != nil {
@@ -90,7 +91,7 @@ func (m *articleblogRepository) GetByID(ctx context.Context, id int) (res *model
 }
 
 func (m *articleblogRepository) Update(ctx context.Context, ar *models.ArticleBlog) error {
-	query := `UPDATE article_blogs set modified_by=?, modified_date=? , country_name=?  WHERE id = ?`
+	query := `UPDATE article_blogs set modified_by=?, modified_date=? , article_blog_name=? , title=?, description=?, category_id=?, article_picture=?  WHERE id = ?`
 
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
@@ -137,12 +138,12 @@ func (m *articleblogRepository) Delete(ctx context.Context, id int, deleted_by s
 
 func (m *articleblogRepository) Insert(ctx context.Context, a *models.ArticleBlog) error {
 	query := `INSERT article_blogs SET id=? , created_by=? , created_date=? , modified_by=?, modified_date=? , deleted_by=? , deleted_date=? , is_deleted=? , is_active=? ,
-	article_blog_name=?, title=?, description=?, category_id=?`
+	article_blog_name=?, title=?, description=?, category_id=?, article_picture=?`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err
 	}
-	_, err = stmt.ExecContext(ctx, a.Id, a.CreatedBy, time.Now(), nil, nil, nil, nil, 0, 1, a.ArticleBlogName, a.Title,a.Description, a.CategoryId)
+	_, err = stmt.ExecContext(ctx, a.Id, a.CreatedBy, time.Now(), nil, nil, nil, nil, 0, 1, a.ArticleBlogName, a.Title,a.Description, a.CategoryId ,a.ArticlePicture)
 	if err != nil {
 		return err
 	}
