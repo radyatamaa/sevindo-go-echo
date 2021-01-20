@@ -61,6 +61,10 @@ func (m ArticleBlogUsecase) Update(c context.Context, ar *models.NewCommandArtic
 	var modifyBy string = currentUser.Email
 	now := time.Now()
 	getArticleBlog.ArticleBlogName = ar.ArticleBlogName
+	getArticleBlog.Title = ar.Title
+	getArticleBlog.Description = ar.Description
+	getArticleBlog.CategoryId = ar.CategoryId
+	getArticleBlog.ArticlePicture = ar.ArticlePicture
 	getArticleBlog.ModifiedBy = &modifyBy
 	getArticleBlog.ModifiedDate = &now
 	err = m.articleblogRepo.Update(ctx, getArticleBlog)
@@ -92,6 +96,7 @@ func (m ArticleBlogUsecase) Create(c context.Context, ar *models.NewCommandArtic
 		Title: ar.Title,
 		Description: ar.Description,
 		CategoryId: ar.CategoryId,
+		ArticlePicture: ar.ArticlePicture,
 	}
 
 	err = m.articleblogRepo.Insert(ctx, &insert)
