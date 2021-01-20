@@ -86,6 +86,10 @@ import (
 	_promoRepo "github.com/master/promo/repository"
 	_promoUcase "github.com/master/promo/usecase"
 
+	_galleryexperienceHttpDeliver "github.com/master/gallery_experience/delivery/http"
+	_galleryexperienceRepo "github.com/master/gallery_experience/repository"
+	_galleryexperienceUcase "github.com/master/gallery_experience/usecase"
+
 
 	_amenitiesHttpDeliver "github.com/master/amenities/delivery/http"
 	_amenitiesRepo "github.com/master/amenities/repository"
@@ -101,6 +105,10 @@ import (
 	_reviewHttpDeliver "github.com/services/review/delivery/http"
 	_reviewRepo "github.com/services/review/repository"
 	_reviewUcase "github.com/services/review/usecase"
+
+	_bookingHttpDeliver "github.com/booking/booking/delivery/http"
+	_bookingRepo "github.com/booking/booking/repository"
+	_bookingUcase "github.com/booking/booking/usecase"
 )
 
 func main() {
@@ -190,6 +198,7 @@ func main() {
 	bankRepo := _bankRepo.NewBankRepository(dbConn)
 	districtsRepo := _districtsRepo.NewDistrictsRepository(dbConn)
 	promoRepo := _promoRepo.NewPromoRepository(dbConn)
+	galleryexperienceRepo := _galleryexperienceRepo.NewGalleryExperienceRepository(dbConn)
 	amenitiesRepo := _amenitiesRepo.NewAmenitiesRepository(dbConn)
 	resortRoomPhotoRepo := _resortRoomPhotoRepo.NewresortRoomPhotoRepository(dbConn)
 	resortRoomPaymentRepo := _resortRoomPaymentRepo.NewresortRoomPaymentRepository(dbConn)
@@ -198,6 +207,7 @@ func main() {
 	accessibilityResortRepo := _accessibilityResortRepo.NewaccessibilityResortRepository(dbConn)
 	amenitiesResortRepo := _amenitiesResortRepo.NewamenitiesResortRepository(dbConn)
 	reviewRepo := _reviewRepo.NewreviewRepository(dbConn)
+	bookingRepo := _bookingRepo.NewbookingRepository(dbConn)
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
 
@@ -217,17 +227,19 @@ func main() {
 	bankUsecase := _bankUcase.NewbankUsecase(adminUsecase, bankRepo, timeoutContext)
 	districtsUsecase := _districtsUcase.NewdistrictsUsecase(adminUsecase, districtsRepo, timeoutContext)
 	promoUsecase := _promoUcase.NewpromoUsecase(adminUsecase, promoRepo, timeoutContext)
+	galleryexperienceUsecase := _galleryexperienceUcase.NewGalleyExperienceUsecase(adminUsecase, galleryexperienceRepo, timeoutContext)
 	amenitiesUsecase := _amenitiesUcase.NewAmenitiesUsecase(adminUsecase, amenitiesRepo, timeoutContext)
 	accessibilityUsecase := _accessibilityUcase.NewaccessibilityUsecase(adminUsecase, accessibilityRepo, timeoutContext)
 	reviewUsecase := _reviewUcase.NewreviewUsecase(userUsecase,reviewRepo,timeoutContext)
+	bookingUsecase := _bookingUcase.NewbookingUsecase(isUsecase,userUsecase,bookingRepo,timeoutContext)
 
+	_bookingHttpDeliver.NewaBookingHandler(e,bookingUsecase)
 	_reviewHttpDeliver.NewreviewHandler(e,reviewUsecase)
 	_resortHttpDeliver.NewresortHandler(e, resortUsecase)
-	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)
+	_branchHttpDeliver.NewbranchHandler(e, branchUsecase,isUsecase)
 	_currencyHttpDeliver.NewcurrencyHandler(e, currencyUsecase)
 	_userAdminHttpDeliver.NewuserAdminHandler(e, adminUsecase, isUsecase)
 	_countryHttpDeliver.NewcountryHandler(e, countryUsecase)
-	_branchHttpDeliver.NewbranchHandler(e, branchUsecase)
 	_userHttpDeliver.NewuserHandler(e, userUsecase, isUsecase)
 	_isHttpDeliver.NewisHandler(e, userUsecase, isUsecase, adminUsecase)
 	_languageHttpDeliver.NewlanguageHandler(e, languageUsecase)
@@ -240,6 +252,7 @@ func main() {
 	_bankHttpDeliver.NewbankHandler(e, bankUsecase)
 	_districtsHttpDeliver.NewdistrictsHandler(e, districtsUsecase)
 	_promoHttpDeliver.NewpromoHandler(e, promoUsecase)
+	_galleryexperienceHttpDeliver.NewGalleryExperienceHandler(e, galleryexperienceUsecase)
 	_amenitiesHttpDeliver.NewAmenitiesHandler(e, amenitiesUsecase)
 	_accessibilityHttpDeliver.NewaccessibilityHandler(e, accessibilityUsecase)
 	log.Fatal(e.Start(":9090"))
