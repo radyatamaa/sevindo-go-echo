@@ -30,3 +30,23 @@ type Transaction struct {
 	TicketPrice 		*float64 `json:"ticket_price"`
 	ReferralCode 		*string `json:"referral_code"`
 }
+
+type TransactionIn struct {
+	BookingType         int     `json:"booking_type,omitempty"`
+	BookingId           string  `json:"booking_id"`
+	OrderId             string  `json:"order_id"`
+	PaypalOrderId       string  `json:"paypal_order_id"`
+	CcTokenId           string  `json:"cc_token_id"`
+	CcAuthId            string  `json:"cc_auth_id"`
+	PromoId             string  `json:"promo_id"`
+	PaymentMethodId     *string  `json:"payment_method_id"`
+	ResortRoomPayment string `json:"resort_room_payment"`
+	Status              int     `json:"status,omitempty"`
+	TotalPrice          float64 `json:"total_price,omitempty"`
+	Currency            string  `json:"currency"`
+	Points              float64 `json:"points"`
+	ExChangeRates 		float64	`json:"ex_change_rates"`
+	ExChangeCurrency 	string		`json:"ex_change_currency"`
+	OriginalPrice 		*float64	`json:"original_price"`
+	ReferralCode 		*string `json:"referral_code"`
+}

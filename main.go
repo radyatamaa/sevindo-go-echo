@@ -113,6 +113,10 @@ import (
 	_contactHttpDeliver "github.com/profile/contact/delivery/http"
 	_contactRepo "github.com/profile/contact/repository"
 	_contactUcase "github.com/profile/contact/usecase"
+
+	_transactionHttpDeliver "github.com/booking/transaction/delivery/http"
+	_transactionRepo "github.com/booking/transaction/repository"
+	_transactionUcase "github.com/booking/transaction/usecase"
 )
 
 func main() {
@@ -213,6 +217,7 @@ func main() {
 	reviewRepo := _reviewRepo.NewreviewRepository(dbConn)
 	bookingRepo := _bookingRepo.NewbookingRepository(dbConn)
 	contactRepo := _contactRepo.NewAcontactRepository(dbConn)
+	transactionRepo := _transactionRepo.NewTransactionRepository(dbConn)
 
 	timeoutContext := 30 * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
@@ -239,7 +244,9 @@ func main() {
 	reviewUsecase := _reviewUcase.NewreviewUsecase(userUsecase,reviewRepo,timeoutContext)
 	bookingUsecase := _bookingUcase.NewbookingUsecase(isUsecase,userUsecase,bookingRepo,timeoutContext)
 	contactUsecase := _contactUcase.NewcontactUsecase(userUsecase,contactRepo,timeoutContext)
+	transactionUsecase := _transactionUcase.NewtransactionUsecase(userUsecase,transactionRepo,timeoutContext)
 
+	_transactionHttpDeliver.NewaTransactionHandler(e,transactionUsecase)
 	_contactHttpDeliver.NewcontactHandler(e,contactUsecase)
 	_bookingHttpDeliver.NewaBookingHandler(e,bookingUsecase)
 	_reviewHttpDeliver.NewreviewHandler(e,reviewUsecase)
